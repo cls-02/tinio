@@ -4,9 +4,9 @@
 #include <string>
 using namespace std;
 
-enum errorLevel_t {debug = 0,warning,error,crash};
 namespace errorEngine
 {
+  enum errorLevel_t {debug = 0,warning,error,crash};
   struct errorEngineCreds
   {
     string errorLocation;
