@@ -1,0 +1,4 @@
+/root/projekti/CyUSB/tinio/main.cpp:6:43: fatal error: /usr/local/lib/libcyusbserial.h: Datoteka ali imenik s tem imenom ne obstaja
+ #include "/usr/local/lib/libcyusbserial.h"
+                                           ^
+compilation terminated.

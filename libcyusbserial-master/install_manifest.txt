@@ -1,0 +1,4 @@
+/usr/local/include/CyUSBSerial.h
+/usr/local/lib/libcyusbserial.so.1
+/usr/local/lib/libcyusbserial.so
+/usr/local/bin/cyusbserialtest
