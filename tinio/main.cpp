@@ -4,18 +4,51 @@
 #include <string>
 using namespace std;
 
+
 namespace errorEngine
 {
+
   enum errorLevel_t {debug = 0,warning,error,crash};
+  errorLevel_t globalErrLvl = error;
   struct errorEngineCreds
   {
     string errorLocation;
     string errorName;
     int8_t errorValue;
     errorLevel_t errorLevel;
+    bool isCyErrVal;
   };
-  void handleErrors(errorEngineCreds);
+  void handleErrors(errorEngineCreds eecToEval)
+  {
+    switch(eecToEval.errorLevel)
+    {
+      case debug:
+        if (globalErrLvl == debug)
+        {
+          cerr << "Debug: " << eecToEval.errorLocation << ": " << eecToEval.errorName << endl;
+        }
+
+      case warning:
+        if (globalErrLvl == warning)
+        {
+          cerr << "Warning: " << eecToEval.errorLocation << ": " << eecToEval.errorName << endl;
+        }
+      case error:
+        if (globalErrLvl == error)
+        {
+          cerr << "ERROR: " << eecToEval.errorLocation << ": " << eecToEval.errorName << endl;
+        }
+      case crash:
+        if (globalErrLvl == crash)
+        {
+          cerr << "FATAL ERROR: " << eecToEval.errorLocation << ": " << eecToEval.errorName << endl;
+          cerr << "REQUESTING CRASH!" <<endl;
+        }
+    }
+  }
 }
+
+
 
 
 struct accessNums_t
@@ -37,6 +70,8 @@ public:
     localAccessNums = accessNums;
   }
   Device(void);
-  void deviceSet();
+  void deviceSet()
+  {
+  }
   void deviceDestroy();
 };
