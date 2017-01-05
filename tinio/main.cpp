@@ -16,7 +16,6 @@ namespace errorEngine {
     string errorName;
     int8_t errorValue;
     errorLevel_t errorLevel;
-    bool isCyErrVal;
   };
 
   void handleErrors(errorEngineCreds eecToEval) {
@@ -48,9 +47,11 @@ namespace errorEngine {
 
   void controlledCrash() {
     cerr << "Triggering a controlled crash..." << endl;
-    int i = 3 / 0; // triggers a floating point error
+    3 / 0; // triggers a floating point error
     return;
   }
+
+  int callExternFun(int ())
 }
 
 struct accessNums_t {
@@ -61,7 +62,7 @@ struct accessNums_t {
 class Device {
 private:
   errorEngine::errorEngineCreds localErrorCreds {
-    "Device handler class", "", 0,  errorEngine::errorLevel_t::debug, false
+    "Device handler class", "", 0,  errorEngine::errorLevel_t::debug
   };
   CY_HANDLE localDeviceHandle;
   accessNums_t localAccessNums;
