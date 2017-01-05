@@ -51,7 +51,13 @@ namespace errorEngine {
     return;
   }
 
-  int callExternFun(int ())
+  int callExternFun(CY_RETURN_STATUS function()) {
+    int retval=function();
+    if (retval != CY_SUCCESS) {
+      this.localErrorCreds.errorValue = retval;
+
+    }
+  }
 }
 
 struct accessNums_t {
