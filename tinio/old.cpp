@@ -7,7 +7,7 @@
 
 // those vars are to be used with locateDevice function
 const uint8_t devInfoListLen = 200;
-const CY_VID_PID deviceVidPid{UINT16(0x04b4), UINT16(0x0002)};
+const CY_VID_PID deviceVidPid{UINT16(0x04b4), UINT16(0x0004)};
 uint8_t deviceNumList[devInfoListLen];
 uint8_t deviceCount;
 CY_DEVICE_INFO deviceInfoList[devInfoListLen];
@@ -141,8 +141,18 @@ int selectDevice(const uint8_t whichDev = 0) {
   }
   return -1;
 }
+void test()
+{
+  char trash;
+  trash = getchar();
+  CySetGpioValue(deviceHandle, 8, 0);
+
+
+}
 
 int main(int argc, char const *argv[]) {
   initLib();
   locateDevice();
+  selectDevice();
+  test();
 }
