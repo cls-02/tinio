@@ -4,16 +4,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
 // those vars are to be used with locateDevice function
-const uint8_t devInfoListLen = 200;
-const CY_VID_PID deviceVidPid{UINT16(0x04b4), UINT16(0x0004)};
-uint8_t deviceNumList[devInfoListLen];
+const uint8_t maxDevs = 16;  // 16 connected devices should be enough...
+const CY_VID_PID deviceVidPid{UINT16(0x04b4), UINT16(0x0004)}; // the id for the chip
+uint8_t deviceNumList[maxDevs];
 uint8_t deviceCount;
-CY_DEVICE_INFO deviceInfoList[devInfoListLen];
+CY_DEVICE_INFO deviceInfoList[maxDevs];
 
 // vars for deviceOpen function
-CY_HANDLE deviceHandle;
+uint8_t whichDev;
+uint8_t interfaceNum;
+CY_HANDLE deviceHandleList[maxDevs];
 uint8_t defaultInterfaceNum = 0;
 
 //----ACTUAL CODE BELOW
@@ -109,7 +112,7 @@ int locateDevice() // locate the device and verify it's the right one
   try {
     CY_RETURN_STATUS retVal;
     retVal = CyGetDeviceInfoVidPid(deviceVidPid, deviceNumList, deviceInfoList,
-                                   &deviceCount, devInfoListLen);
+                                   &deviceCount, maxDevs);
     throw retVal;
   } catch (CY_RETURN_STATUS errVal) {
     int r = evalErrors(errVal);
@@ -121,38 +124,79 @@ int locateDevice() // locate the device and verify it's the right one
            "otherwise.");
       return 0;
     }
+    if (deviceCount == 0) {
+      puts("No devices found!");
+      return 10;
+    }
     return 0;
   }
 }
 
-int selectDevice(const uint8_t whichDev = 0) {
-  if (deviceCount == 0) {
-    puts("No devices found!");
-    return 10;
-  }
+int selectDevice() {
+
   if (whichDev > deviceCount) {
     puts("The requested device doesn't exist.");
     return 5;
   }
-  CY_RETURN_STATUS retval =
-      CyOpen(deviceNumList[whichDev], defaultInterfaceNum, &deviceHandle);
-  if (!evalErrors(retval)) {
-    return retval;
+
+  for(int i = 0; i < deviceCount; i++){
+    int rs = evalErrors(CyOpen(deviceNumList[i], interfaceNum, &deviceHandleList[i]));
+    if (rs != 0)
+    {
+      return rs;
+    }
   }
-  return -1;
+  return 0;
 }
-void test()
-{
+
+int isstrdigit(const char *str) {
+  for(; *str != '\0'; str++){
+    if ( !(isdigit(*str)) ) {
+      return 0;
+    }
+  }
+  return 1;
+
+}
+
+void test() {
   char trash;
   trash = getchar();
-  CySetGpioValue(deviceHandle, 8, 0);
+  CySetGpioValue(deviceHandleList[0], 8, 0);
+}
+
+int parseCmdLine(int acount, char * const* arglist) {
+  int opt;
+  while( (opt = getopt(acount, arglist, "d:s:r:v:i:") !=  -1 ) ) {
+    switch(opt) {
+      case 'd':
+      if ( !(isstrdigit(optarg)) )
+      {
+        puts("Unknown argument for switch -d");
+        puts("Arguments MUST be integer numbers!");
+        return -1;
+      }
+      whichDev = atoi(optarg);
+      break;
+
+      case 's':
+      if ( !(isstrdigit(optarg)) )
+      {
+        puts("Unknown argument for switch -s");
+        puts("Arguments MUST be integer numbers!");
+        return -1;
+      }
+      //TODO complete when set and read GPIO are done
+      break;
+
+    }
 
 
 }
-
+}
 int main(int argc, char const *argv[]) {
   initLib();
   locateDevice();
   selectDevice();
-  test();
+  // test();
 }
