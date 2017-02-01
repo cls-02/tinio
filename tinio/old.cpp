@@ -1,14 +1,15 @@
 // Tinio - the Tiny I/O tool
 #include <CyUSBCommon.h>
+#include <ctype.h>
 #include <libusb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <ctype.h>
 
 // those vars are to be used with locateDevice function
-const uint8_t maxDevs = 16;  // 16 connected devices should be enough...
-const CY_VID_PID deviceVidPid{UINT16(0x04b4), UINT16(0x0004)}; // the id for the chip
+const uint8_t maxDevs = 16; // 16 connected devices should be enough...
+const CY_VID_PID deviceVidPid{UINT16(0x04b4),
+                              UINT16(0x0004)}; // the id for the chip
 uint8_t deviceNumList[maxDevs];
 uint8_t deviceCount;
 CY_DEVICE_INFO deviceInfoList[maxDevs];
@@ -132,31 +133,29 @@ int locateDevice() // locate the device and verify it's the right one
   }
 }
 
-int selectDevice() {
-
-  if (whichDev > deviceCount) {
-    puts("The requested device doesn't exist.");
-    return 5;
-  }
-
-  for(int i = 0; i < deviceCount; i++){
-    int rs = evalErrors(CyOpen(deviceNumList[i], interfaceNum, &deviceHandleList[i]));
-    if (rs != 0)
-    {
+int attachDevices() {
+  for (int i = 0; i < deviceCount; i++) {
+    int rs = evalErrors(
+        CyOpen(deviceNumList[i], interfaceNum, &deviceHandleList[i]));
+    if (rs != 0) {
       return rs;
     }
   }
   return 0;
 }
 
+int setGPIO(int targetPin, uint8_t value) {
+  int retval = evalErrors(CySetGpioValue(deviceHandleList[whichDev-1], targetPin, value));
+  return retval;
+}
+
 int isstrdigit(const char *str) {
-  for(; *str != '\0'; str++){
-    if ( !(isdigit(*str)) ) {
+  for (; *str != '\0'; str++) {
+    if (!(isdigit(*str))) {
       return 0;
     }
   }
   return 1;
-
 }
 
 void test() {
@@ -165,13 +164,12 @@ void test() {
   CySetGpioValue(deviceHandleList[0], 8, 0);
 }
 
-int parseCmdLine(int acount, char * const* arglist) {
+int parseCmdLine(int acount, char *const *arglist) {
   int opt;
-  while( (opt = getopt(acount, arglist, "d:s:r:v:i:") !=  -1 ) ) {
-    switch(opt) {
-      case 'd':
-      if ( !(isstrdigit(optarg)) )
-      {
+  while ((opt = getopt(acount, arglist, "d:s:r:v:i:") != -1)) {
+    switch (opt) {
+    case 'd':
+      if (!(isstrdigit(optarg))) {
         puts("Unknown argument for switch -d");
         puts("Arguments MUST be integer numbers!");
         return -1;
@@ -179,24 +177,20 @@ int parseCmdLine(int acount, char * const* arglist) {
       whichDev = atoi(optarg);
       break;
 
-      case 's':
-      if ( !(isstrdigit(optarg)) )
-      {
+    case 's':
+      if (!(isstrdigit(optarg))) {
         puts("Unknown argument for switch -s");
         puts("Arguments MUST be integer numbers!");
         return -1;
       }
-      //TODO complete when set and read GPIO are done
+      // TODO complete when set and read GPIO are done
       break;
-
     }
-
-
-}
+  }
 }
 int main(int argc, char const *argv[]) {
   initLib();
   locateDevice();
-  selectDevice();
+  attachDevices();
   // test();
 }
