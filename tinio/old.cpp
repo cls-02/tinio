@@ -5,7 +5,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 
+// Those are flags used for flow control inside the program
+uint8_t whichDev;
+uint8_t interfaceNum;
+uint8_t writeFlag;
+uint8_t readFlag;
+uint8_t exitFlag;
+uint8_t pinNumber;
+uint8_t valueToWrite;
 // those vars are to be used with locateDevice function
 const uint8_t maxDevs = 16; // 16 connected devices should be enough...
 const CY_VID_PID deviceVidPid{UINT16(0x04b4),
@@ -15,8 +24,8 @@ uint8_t deviceCount;
 CY_DEVICE_INFO deviceInfoList[maxDevs];
 
 // vars for deviceOpen function
-uint8_t whichDev;
-uint8_t interfaceNum;
+
+
 CY_HANDLE deviceHandleList[maxDevs];
 uint8_t defaultInterfaceNum = 0;
 
@@ -158,39 +167,95 @@ int isstrdigit(const char *str) {
   return 1;
 }
 
+void unknownOptarg(int option, char *argument)
+{
+  printf("Unknown option argument -- \'%s\' at option -%c \n", argument, option);
+}
+
+void pinNum2HiLo()
+{
+  puts("Pin number you specified is too high.");
+  puts("Pin numbers must be between 0 and 11");
+}
+
+void rwConflict()
+{
+  puts("Can't write and read at the same time!");
+}
+
 void test() {
   char trash;
   trash = getchar();
   CySetGpioValue(deviceHandleList[0], 8, 0);
 }
 
-int parseCmdLine(int acount, char *const *arglist) {
+int parseCmdLine(int acount, char **arglist) {
   int opt;
-  while ((opt = getopt(acount, arglist, "d:s:r:v:i:") != -1)) {
+  opt = getopt(acount, arglist, "d:s:r:v:i:");
+  while (opt != -1) {
     switch (opt) {
     case 'd':
-      if (!(isstrdigit(optarg))) {
-        puts("Unknown argument for switch -d");
-        puts("Arguments MUST be integer numbers!");
-        return -1;
-      }
-      whichDev = atoi(optarg);
-      break;
+    if(!isstrdigit(optarg))
+    {
+      unknownOptarg(opt, optarg);
+    }
+    whichDev = atoi(optarg);
+    break;
 
     case 's':
-      if (!(isstrdigit(optarg))) {
-        puts("Unknown argument for switch -s");
-        puts("Arguments MUST be integer numbers!");
-        return -1;
-      }
-      // TODO complete when set and read GPIO are done
-      break;
+    if(!isstrdigit(optarg))
+    {
+      unknownOptarg(opt, optarg);
+      return -1;
     }
+
+    if(pinNumber > 11) {
+      pinNum2HiLo();
+      return -1;
+    }
+    if(readFlag == 1){
+      rwConflict();
+      return -1;
+    }
+    writeFlag=1;
+    pinNumber=atoi(optarg);
+    break;
+
+    case 'r':
+    if(!isstrdigit(optarg))
+    {
+      unknownOptarg(opt, optarg);
+      return -1;
+    }
+
+    if(pinNumber > 11) {
+      pinNum2HiLo();
+      return -1;
+    }
+    if(writeFlag == 1){
+      rwConflict();
+      return -1;
+    }
+    readFlag=1;
+    pinNumber=atoi(optarg);
+    break;
+
+    case 'i':
+    if(!isstrdigit(optarg))
+    {
+      unknownOptarg(opt, optarg);
+      return -1;
+    }
+    interfaceNum=atoi(optarg);
+    break;
+    }
+    opt = getopt(acount, arglist, "d:s:r:v:i:");
   }
 }
-int main(int argc, char const *argv[]) {
+int main(int argc, char **argv) {
   initLib();
   locateDevice();
   attachDevices();
+  parseCmdLine(argc, argv);
   // test();
 }
