@@ -8,13 +8,13 @@
 #include <stdint.h>
 
 // Those are flags used for flow control inside the program
-uint8_t whichDev;
-uint8_t interfaceNum;
-uint8_t writeFlag;
-uint8_t readFlag;
-uint8_t exitFlag;
-uint8_t pinNumber;
-uint8_t valueToWrite;
+uint8_t whichDev=177;       // 177 values indicate unset variables.
+uint8_t interfaceNum=177;
+uint8_t writeFlag=0;
+uint8_t readFlag=0;
+uint8_t exitFlag=1;
+uint8_t pinNumber=177;
+uint8_t valueToWrite=177;
 // those vars are to be used with locateDevice function
 const uint8_t maxDevs = 16; // 16 connected devices should be enough...
 const CY_VID_PID deviceVidPid{UINT16(0x04b4),
@@ -169,24 +169,41 @@ int isstrdigit(const char *str) {
 
 void unknownOptarg(int option, char *argument)
 {
-  printf("Unknown option argument -- \'%s\' at option -%c \n", argument, option);
+  printf("Error: Unknown option argument -- \'%s\' at option -%c \n", argument, option);
 }
 
-void pinNum2HiLo()
+void pinNum2HiLo(int number)
 {
-  puts("Pin number you specified is too high.");
+  printf("Error: The specified pin number - %i is too high.", number);
   puts("Pin numbers must be between 0 and 11");
 }
 
 void rwConflict()
 {
-  puts("Can't write and read at the same time!");
+  puts("Error: Can't write and read at the same time!");
 }
 
+void uselessValue()
+{
+  puts("Error: -v option can't be used when reading!");
+}
+
+void value2Hi(int number)
+{
+  printf("Error: The specified value - %i is too big/small.", number);
+  puts("Values must be zero or positive integers, smaller than 255.");
+}
+void devNum2Hi(int number)
+{
+  printf("Error: The specified device number - %i is bigger than 15 or negative\n", number);
+  puts("Note: The number of allowed devices can be adjusted by manipulating maxDevs");
+  puts("variable in the source code.");
+}
+
+
 void test() {
-  char trash;
-  trash = getchar();
-  CySetGpioValue(deviceHandleList[0], 8, 0);
+  printf("read: %i | write: %i | pinNumber: %i | valueToWrite: %i \n", readFlag, writeFlag, pinNumber, valueToWrite);
+  printf("whichDev: %i | interfaceNum: %i \n \n", whichDev, interfaceNum);
 }
 
 int parseCmdLine(int acount, char **arglist) {
@@ -200,6 +217,12 @@ int parseCmdLine(int acount, char **arglist) {
       unknownOptarg(opt, optarg);
     }
     whichDev = atoi(optarg);
+    if(whichDev > 15 || whichDev < 0 )
+    {
+      devNum2Hi(whichDev);
+      whichDev=177;
+      return -1;
+    }
     break;
 
     case 's':
@@ -208,17 +231,19 @@ int parseCmdLine(int acount, char **arglist) {
       unknownOptarg(opt, optarg);
       return -1;
     }
-
+    pinNumber=atoi(optarg);
     if(pinNumber > 11) {
-      pinNum2HiLo();
+      pinNum2HiLo(pinNumber);
+      pinNumber=177;
       return -1;
     }
     if(readFlag == 1){
       rwConflict();
+      pinNumber=177;
       return -1;
     }
     writeFlag=1;
-    pinNumber=atoi(optarg);
+    readFlag=0;
     break;
 
     case 'r':
@@ -227,17 +252,19 @@ int parseCmdLine(int acount, char **arglist) {
       unknownOptarg(opt, optarg);
       return -1;
     }
-
+    pinNumber=atoi(optarg);
     if(pinNumber > 11) {
-      pinNum2HiLo();
+      pinNum2HiLo(pinNumber);
+      pinNumber=177;
       return -1;
     }
     if(writeFlag == 1){
       rwConflict();
+      pinNumber=177;
       return -1;
     }
     readFlag=1;
-    pinNumber=atoi(optarg);
+    writeFlag=0;
     break;
 
     case 'i':
@@ -248,14 +275,40 @@ int parseCmdLine(int acount, char **arglist) {
     }
     interfaceNum=atoi(optarg);
     break;
+
+    case 'v':
+    if(!isstrdigit(optarg))
+    {
+      unknownOptarg(opt, optarg);
+      valueToWrite=177;
+      writeFlag=0;
+      return -1;
+    }
+    if(readFlag==1)
+    {
+      uselessValue();
+      valueToWrite=177;
+      writeFlag=0;
+      return -1;
+    }
+    valueToWrite=atoi(optarg);
+    if(valueToWrite > 255 || valueToWrite < 0)
+    {
+      value2Hi(valueToWrite);
+      valueToWrite=177;
+      writeFlag=0;
+      return -1;
+    }
+
     }
     opt = getopt(acount, arglist, "d:s:r:v:i:");
   }
+
 }
 int main(int argc, char **argv) {
   initLib();
   locateDevice();
   attachDevices();
   parseCmdLine(argc, argv);
-  // test();
+  test();
 }
