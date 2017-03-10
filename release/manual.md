@@ -37,7 +37,9 @@ b) executing the `autobuilder` script in the main directory that will do the abo
 **NOTE: Although the autobuilder should be working in most use cases, it's still better to build the tools manually (if you have the needed knowledge, of course)**
 
 ## 2\. Getting started
-
+Before you start using TinI/O, you have to reflash the target chip so it can be recognised by your PC. That is done with the supplied `cy-config` utility.
+To reflash a chip, you'll need to navigate to `/usr/share/tinio/flashes` directory. There you'll find files that contain different flash images. (I'll say more about the images later in the chapter TODO)
+For a general configuration (5 inputs, 5 outputs), we'll use TODO
 You can get a quick summary on TinI/O by executing it.
 
 ```
