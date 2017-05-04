@@ -1,4 +1,3 @@
-SHELL = /bin/bash
 CC=g++
 
 default: tinio utils
