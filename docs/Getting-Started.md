@@ -98,7 +98,7 @@ Enter the interface number you memorised earlier.
 
 
 ```
-At this point, hit Ctrl-C and your device is programmed can be used with TinI/O.
+At this point, hit Ctrl-C and your device is programmed and can be used with TinI/O.
 
 ## 3. Using `tinio`
 A short summary of TinI/O's options can be found by executing `tinio` without any options:
