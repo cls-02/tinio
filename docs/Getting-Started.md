@@ -8,11 +8,11 @@ is a tool for interfacing the Cypress CY7C65211 USB-Serial Bridge Controller and
 
 To set up TinI/O, you'll need:
 
-- A linux machine (the processor architecture doesn't matter, but Debian or Ubuntu is almost guaranteed to work)
-- an USB dongle with the chip
-- a C and C++ compiler (GCC recommended)
-- GNU Make and CMake
-- libusb 1.0
+-   A linux machine (the processor architecture doesn't matter, but Debian or Ubuntu is almost guaranteed to work)
+-   an USB dongle with the chip
+-   a C and C++ compiler (GCC recommended)
+-   GNU Make and CMake
+-   libusb 1.0
 
 You can build TinI/O by
 
