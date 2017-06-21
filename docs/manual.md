@@ -74,14 +74,17 @@ Cypress CY7C65211 can be flashed only from Windows with a dedicated Cypress util
 -   `5-5_decoded.cyusbd`, that provides 5 input and 5 output ports
 -   `3-3cs_decoded.cyusbd`, that provides 3 input and 3 output ports, plus a CapSense button with its dedicated input.
 
-## 3.2 A little more detail on the flash files
-
-
-The flash files that are included with TinI/O don't have a Linux-compatible editor and therefore can't be tweaked to fit one's needs ideally. However, this can be done in a Windows environment using a dedicated program from Cypress. With it you can modify the chip's configuration without being limited to the premade flash files. However, some USB-related settings are and **have to be**  the same regardless of the use case to ensure compatibility with TinI/O program.
-
-Use case independent properties:
-
-| Max. Current drawn from USB | 350mA |
+And they provide the following configurations:
+| _parameter_ | _value in `5-5_decoded.cyusbd`_ | _value in `3-3cs_decoded.cyusbd`_ |
+|-------------|---------------------------------|-----------------------------------|
+| Max. current drawn from USB | 350 mA | 350 mA |
+| USB device class | PHDC | PHDC |
+| I/O logic level | LVTTL | LVTTL |
+| USB Vendor ID | 0x04b4 (Cypress) | 0x04b4 (Cypress) |
+| USB Product ID | 0x0002 | 0x0002 |
+| Manufacturer string | TinI/O | TinI/O |
+| Product string | 5/5 | 3/3CS |
+| UART Tx pin | 5 | 5 |
 
 ## 3.3 Flashing with the `cy-config` utility
 
