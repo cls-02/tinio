@@ -15,7 +15,7 @@ bool valueToWrite=false, writeFlag=false, readFlag=false, exitFlag=false, expert
 // those vars are to be used with locateDevice function
 const uint8_t maxDevs = 16; // 16 connected devices should be enough...
 const CY_VID_PID deviceVidPid{UINT16(0x04b4),
-                              UINT16(0x0002)}; // the id for the chip
+                              UINT16(0x0004)}; // the id for the chip
 uint8_t deviceNumList[maxDevs];
 uint8_t deviceCount;
 CY_DEVICE_INFO deviceInfoList[maxDevs];
@@ -171,16 +171,15 @@ int evalErrors(const CY_RETURN_STATUS error) { // evaluates errors, duh?
 int locateDevice() // locate the device and verify it's the right one
 {
   // printf("Locating devices...");         //debug, not needed
-  try {
+
     CY_RETURN_STATUS retVal;
-    retVal = CyGetDeviceInfoVidPid(
-        deviceVidPid, deviceNumList,
-        deviceInfoList,         //--searches for the device with given VID/PID
-        &deviceCount, maxDevs); //--and stores them into lists
-                                //--refer to lib docs for more info
-    throw retVal;               // throws the return value of the func
-  } catch (CY_RETURN_STATUS errVal) {
-    int r = evalErrors(errVal); // evaluate the errors
+    retVal = CyGetDeviceInfoVidPid( //--searches for the device with given VID/PID
+        deviceVidPid, deviceNumList, //--and stores them into lists
+        deviceInfoList,         //--refer to lib docs for more info
+        &deviceCount, maxDevs);
+
+
+    int r = evalErrors(retVal); // evaluate the errors
     if (r != 0) {               // exit on error
       return r;
     }
@@ -192,7 +191,6 @@ int locateDevice() // locate the device and verify it's the right one
       return 10;
     }
     return 0;
-  }
 }
 
 int attachDevices() { // loops through devices and attaches them to handles

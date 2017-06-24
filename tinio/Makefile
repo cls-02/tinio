@@ -4,10 +4,10 @@ default: tinio utils
 
 tinio:
 	echo "Building tinio..."
-	$(CC) -lcyusbserial main.cpp -o tinio
+	$(CC) -lcyusbserial tinio.cpp -o tinio
 
 utils:
-	$(CC) -lcyusbserial Command_Utility.c -o cy-config
+	$(CC) -lcyusbserial cy-config.c -o cy-config
 
 install:
 	echo "Installing tinio and flasher"
@@ -16,3 +16,4 @@ install:
 	mkdir /usr/share/tinio
 	mkdir /usr/share/tinio/flashes
 	cp flashes/* /usr/share/tinio/flashes
+	

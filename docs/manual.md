@@ -69,24 +69,50 @@ After the installation of TinI/O, you actually don't need to do anything at all 
 
 ## 3.1 Flashing the chips
 
+
 Cypress CY7C65211 can be flashed only from Windows with a dedicated Cypress utility due to its unique flash file format. Fortunately, after some bargaining with Cypress I got a Linux utility that is licensed under LGPL and free (as speech _and_ beer). It can flash special, decoded versions of flash files that can be produced with a special Windows decoder executable that I can't provide with TinI/O because it's not GPL'd (actually it's not even licensed!) and isn't released to the public (yet). Instead the TinI/O package includes 2 already decoded flash files that should satisfy the needs of a typical user. Their names are:
 
 -   `5-5_decoded.cyusbd`, that provides 5 input and 5 output ports
 -   `3-3cs_decoded.cyusbd`, that provides 3 input and 3 output ports, plus a CapSense button with its dedicated input.
 
 And they provide the following configurations:
-| _parameter_ | _value in `5-5_decoded.cyusbd`_ | _value in `3-3cs_decoded.cyusbd`_ |
-|-------------|---------------------------------|-----------------------------------|
+
+| parameter | value in `5-5_decoded.cyusbd` | value in `3-3cs_decoded.cyusbd` |
+|----|----|----|
+| **USB** | | |
 | Max. current drawn from USB | 350 mA | 350 mA |
 | USB device class | PHDC | PHDC |
-| I/O logic level | LVTTL | LVTTL |
-| USB Vendor ID | 0x04b4 (Cypress) | 0x04b4 (Cypress) |
-| USB Product ID | 0x0002 | 0x0002 |
+| USB ID (vid:pid) | 0x04b4:0004 (Cypress) | 0x04b4:0004 (Cypress) |
 | Manufacturer string | TinI/O | TinI/O |
 | Product string | 5/5 | 3/3CS |
-| UART Tx pin | 5 | 5 |
+| **Serial** | | |
+| UART Tx/Rx pins | 5(Tx)/6(Rx) | 5/6 |
+| UART Speed | 9600 baud | 9600 baud |
+| UART Data/Stop bits | 8/1 | 8/1 |
+| UART Parity | None | None |
+| **I/O** | | |
+| I/O logic level | LVTTL | LVTTL |
+| Pin 0 | Input | **RESERVED for CapSense** Should be decoupled to ground by a 2n2 capacitor |
+| Pin 1 | Input | Input |
+| Pin 2 | Input | **RESERVED for CapSense** CapSense sense (connect to your button) |
+| Pin 3 | Input | **RESERVED for CapSense** CapSense output (the output of your button) |
+| Pin 4 | Input | Input |
+| Pin 5 | **RESERVED** UART Tx | UART Tx |
+| Pin 6 | **RESERVED** UART Rx | UART Rx |
+| Pin 7 | Output | Input |
+| Pin 8 | Output | Output |
+| Pin 9 | Output | Output |
+| Pin 10 | Output | Output |
+| Pin 11 | Output | Input |
+_Note: Not all of the information here is neccesary to know when using TinI/O.
+For a stripped-down version refer to the next chapter, "Using TinI/O"_
+
+Please notice that flashing of these files isn't the only way of configuring chips. They can be also customized with the Windows utility. The important thing is that you should
+configure the USB settings as described in the table above.
 
 ## 3.3 Flashing with the `cy-config` utility
+The flash files I covered in the previous chapter can be flashed with the `cy-config` utility that installs with TinI/O. The utility is text-based. It can be used by running `cy-config`.
 
+Upon execution,
 [chip]: http://www.cypress.com/part/cy7c65211-24ltxi
 [cylib]: http://github.com/cyrozap/libcyusbserial
