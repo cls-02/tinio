@@ -41,14 +41,15 @@ echo "    Going back..."
 cd .. && proceed=1 #to main dir
 proceed
 echo "    DONE!"
-sleep 1 # sleep for 1 sec to let the user see the output
 echo "    Entering the TinI/O build directory"
 cd tinio && proceed=1
-echo "    DONE!"
 proceed
-echo "    Compiling TinI/O..."
-cd tinio && make && make install && proceed=1
+echo "    DONE!"
+echo "    Compiling TinI/O"
+make && make install && proceed=1
 proceed
 echo "    DONE!"
 echo "    Compiling the flasher tool"
 cd ../tool && make && proceed=1
+echo "    DONE!"
+echo -e "\n\n\nThe TinI/O installation is completed."

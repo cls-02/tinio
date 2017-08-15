@@ -25,7 +25,7 @@ To start using TinI/O, make sure you have:
 # Building and installing TinI/O
 
 ## The easy way
-After you make sure that your computer complies with the system requirements (it probably does), you need to build and install TinI/O. The simplest way to do that is to run the `autobuilder` script in the project root (aka the folder you downloaded TinI/O source to) __as root__. The script will then start the build process and redirect any text from its underlying programs to the standard output. A typical output from a succesful installation looks approximately like this:
+After you make sure that your computer complies with the system requirements (it probably does), you need to build and install TinI/O. The simplest way to do that is to run the `autobuilder` script in the project root (aka the folder you downloaded TinI/O source to) __as root__. The script will then start the build process and redirect any text from its underlying programs to the standard output. The output should look like this:
 
 <details>
 <summary>
@@ -33,78 +33,234 @@ Long text - Click to expand
 </summary>
 <pre>
 <code>
+# ./autobuilder
+    --------------------------
+    Autobuilder for TinI/O 0.1
+    --------------------------
+    Verifying main directory...
+    DONE!
+    Entering the library directory...
+    DONE!
+    Compiling and installing the library...
+gcc -fPIC -g -Wall -o libcyusb.o -c cyusb.c -I ../../common/header
+cyusb.c: In function ‘CyOpen’:
+cyusb.c:556:1: warning: ‘rStatus’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+ printf("rstatus6 %d", rStatus);
+ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -fPIC -g -Wall -o libcyuart.o -c cyuart.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyi2c.o -c cyi2c.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyspi.o -c cyspi.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyphdc.o -c cyphdc.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyjtag.o -c cyjtag.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcymisc.o -c cymisc.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyboot.o -c cyboot.c -I ../../common/header
+cyboot.c:72:0: warning: "CY_USB_SERIAL_TIMEOUT" redefined
+ #define CY_USB_SERIAL_TIMEOUT 0
 
---------------------------
-Autobuilder for TinI/O 0.1
---------------------------
-Verifying main directory...
-DONE!
-Entering the library directory...
-DONE!
-Compiling and installing the library...
--- The C compiler identification is GNU 6.3.0
--- Check for working C compiler: /usr/bin/cc
--- Check for working C compiler: /usr/bin/cc -- works
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Detecting C compile features
--- Detecting C compile features - done
--- Found PkgConfig: /usr/bin/pkg-config (found version "0.29")
--- Checking libusb version...
--- libusb version: 1.0.9
+In file included from cyboot.c:1:0:
+CyUSBCommon.h:74:0: note: this is the location of the previous definition
+ #define CY_USB_SERIAL_TIMEOUT 5000
 
--- Looking for pthread.h
--- Looking for pthread.h - found
--- Looking for pthread_create
--- Looking for pthread_create - not found
--- Looking for pthread_create in pthreads
--- Looking for pthread_create in pthreads - not found
--- Looking for pthread_create in pthread
--- Looking for pthread_create in pthread - found
--- Found Threads: TRUE
-CMake Warning at lib/CMakeLists.txt:86 (message):
+cyboot.c: In function ‘CyFlashConfigEnable’:
+cyboot.c:634:21: warning: unused variable ‘ioTimeout’ [-Wunused-variable]
+     UINT32 rStatus, ioTimeout = CY_USB_SERIAL_TIMEOUT;
+                     ^~~~~~~~~
+gcc -shared -g -Wl,-soname,libcyusbserial.so -o libcyusbserial.so.1 libcyusb.o libcyuart.o libcyi2c.o libcyspi.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o -l usb-1.0
+cp libcyusbserial.so.1 /usr/local/lib
+ln -sf /usr/local/lib/libcyusbserial.so.1 /usr/local/lib/libcyusbserial.so
+ldconfig
+rm -f libcyusb.o libcyuart.o libcyspi.o libcyi2c.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o
+    DONE!
+    Library installation complete.
+    Going back...
+    DONE!
+    Entering the TinI/O build directory
+    DONE!
+    Compiling TinI/O
+make: 'tinio' is up to date.
+echo "Installing tinio..."
+Installing tinio...
+cp tinio /usr/bin
+echo "done."
+done.
+    DONE!
+    Compiling the flasher tool
+#	gcc -g -o CyUSBSerialTestUtility Test_Utility.c -lcyusbserial -w
+gcc -g -o CyUSBSerialCommandUtility Command_Utility.c -lcyusbserial
+Command_Utility.c: In function ‘deviceHotPlug’:
+Command_Utility.c:102:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     rStatus = CyGetListofDevices (&numDevices);
+                                   ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:105:16: warning: ‘return’ with a value, in function returning void
+         return rStatus;
+                ^~~~~~~
+Command_Utility.c:95:6: note: declared here
+ void deviceHotPlug () {
+      ^~~~~~~~~~~~~
+Command_Utility.c:107:5: warning: implicit declaration of function ‘printListOfDevices’ [-Wimplicit-function-declaration]
+     printListOfDevices (false);
+     ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: In function ‘main’:
+Command_Utility.c:139:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     rStatus = CyGetListofDevices (&numDevices);
+                                   ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:268:51: warning: passing argument 2 of ‘CyReadDeviceConfig’ from incompatible pointer type [-Wincompatible-pointer-types]
+                 rStatus=CyReadDeviceConfig(handle,&read_buffer);
+                                                   ^
+In file included from Command_Utility.c:34:0:
+../../common/header/CyUSBBootloader.h:203:45: note: expected ‘UCHAR * {aka unsigned char *}’ but argument is of type ‘unsigned char (*)[512]’
+ CYWINEXPORT CY_RETURN_STATUS  WINCALLCONVEN CyReadDeviceConfig (
+                                             ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: At top level:
+Command_Utility.c:382:6: warning: conflicting types for ‘printListOfDevices’
+ void printListOfDevices (bool isPrint)
+      ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:107:5: note: previous implicit declaration of ‘printListOfDevices’ was here
+     printListOfDevices (false);
+     ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: In function ‘printListOfDevices’:
+Command_Utility.c:396:25: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     CyGetListofDevices (&numDevices);
+                         ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:445:75: warning: backslash and newline separated by space
+               printf ("%d             |%x  |%x    | %d     | %s\n", \
+
+cp 90-cyusb.rules /etc/udev/rules.d
+cp CyUSBSerialCommandUtility /usr/bin/cy-config
+cp CyUSBSerial.sh /usr/bin
+chmod 777 /usr/bin/CyUSBSerial.sh
+    DONE!
+\n\n\nThe TinI/O installation is completed.
+ root   master {2} U:2  ~/projekti/CyUSB  ./autobuilder
+    --------------------------
+    Autobuilder for TinI/O 0.1
+    --------------------------
+    Verifying main directory...
+    DONE!
+    Entering the library directory...
+    DONE!
+    Compiling and installing the library...
+gcc -fPIC -g -Wall -o libcyusb.o -c cyusb.c -I ../../common/header
+cyusb.c: In function ‘CyOpen’:
+cyusb.c:556:1: warning: ‘rStatus’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+ printf("rstatus6 %d", rStatus);
+ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -fPIC -g -Wall -o libcyuart.o -c cyuart.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyi2c.o -c cyi2c.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyspi.o -c cyspi.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyphdc.o -c cyphdc.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyjtag.o -c cyjtag.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcymisc.o -c cymisc.c -I ../../common/header
+gcc -fPIC -g -Wall -o libcyboot.o -c cyboot.c -I ../../common/header
+cyboot.c:72:0: warning: "CY_USB_SERIAL_TIMEOUT" redefined
+ #define CY_USB_SERIAL_TIMEOUT 0
+
+In file included from cyboot.c:1:0:
+CyUSBCommon.h:74:0: note: this is the location of the previous definition
+ #define CY_USB_SERIAL_TIMEOUT 5000
+
+cyboot.c: In function ‘CyFlashConfigEnable’:
+cyboot.c:634:21: warning: unused variable ‘ioTimeout’ [-Wunused-variable]
+     UINT32 rStatus, ioTimeout = CY_USB_SERIAL_TIMEOUT;
+                     ^~~~~~~~~
+gcc -shared -g -Wl,-soname,libcyusbserial.so -o libcyusbserial.so.1 libcyusb.o libcyuart.o libcyi2c.o libcyspi.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o -l usb-1.0
+cp libcyusbserial.so.1 /usr/local/lib
+ln -sf /usr/local/lib/libcyusbserial.so.1 /usr/local/lib/libcyusbserial.so
+ldconfig
+rm -f libcyusb.o libcyuart.o libcyspi.o libcyi2c.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o
+    DONE!
+    Library installation complete.
+    Going back...
+    DONE!
+    Entering the TinI/O build directory
+    DONE!
+    Compiling TinI/O
+echo "Building tinio..."
+Building tinio...
+g++ -lcyusbserial tinio.cpp -o tinio
+echo "done."
+done.
+echo "Installing tinio..."
+Installing tinio...
+cp tinio /usr/bin
+echo "done."
+done.
+    DONE!
+    Compiling the flasher tool
+#	gcc -g -o CyUSBSerialTestUtility Test_Utility.c -lcyusbserial -w
+gcc -g -o CyUSBSerialCommandUtility Command_Utility.c -lcyusbserial
+Command_Utility.c: In function ‘deviceHotPlug’:
+Command_Utility.c:102:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     rStatus = CyGetListofDevices (&numDevices);
+                                   ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:105:16: warning: ‘return’ with a value, in function returning void
+         return rStatus;
+                ^~~~~~~
+Command_Utility.c:95:6: note: declared here
+ void deviceHotPlug () {
+      ^~~~~~~~~~~~~
+Command_Utility.c:107:5: warning: implicit declaration of function ‘printListOfDevices’ [-Wimplicit-function-declaration]
+     printListOfDevices (false);
+     ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: In function ‘main’:
+Command_Utility.c:139:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     rStatus = CyGetListofDevices (&numDevices);
+                                   ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:268:51: warning: passing argument 2 of ‘CyReadDeviceConfig’ from incompatible pointer type [-Wincompatible-pointer-types]
+                 rStatus=CyReadDeviceConfig(handle,&read_buffer);
+                                                   ^
+In file included from Command_Utility.c:34:0:
+../../common/header/CyUSBBootloader.h:203:45: note: expected ‘UCHAR * {aka unsigned char *}’ but argument is of type ‘unsigned char (*)[512]’
+ CYWINEXPORT CY_RETURN_STATUS  WINCALLCONVEN CyReadDeviceConfig (
+                                             ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: At top level:
+Command_Utility.c:382:6: warning: conflicting types for ‘printListOfDevices’
+ void printListOfDevices (bool isPrint)
+      ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:107:5: note: previous implicit declaration of ‘printListOfDevices’ was here
+     printListOfDevices (false);
+     ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: In function ‘printListOfDevices’:
+Command_Utility.c:396:25: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     CyGetListofDevices (&numDevices);
+                         ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:445:75: warning: backslash and newline separated by space
+               printf ("%d             |%x  |%x    | %d     | %s\n", \
+
+cp 90-cyusb.rules /etc/udev/rules.d
+cp CyUSBSerialCommandUtility /usr/bin/cy-config
+cp CyUSBSerial.sh /usr/bin
+chmod 777 /usr/bin/CyUSBSerial.sh
+    DONE!
 
 
-libusb >= 1.0.16 is HIGHLY recommended.  If you experience issues or poor
-performance, please try updating libusb.
 
-Detected version: 1.0.9
+The TinI/O installation is completed.
 
-
-
--- Configuring done
--- Generating done
--- Build files have been written to: /root/projekti/CyUSB/cylib/build
-Scanning dependencies of target cyusbserial
-[ 10%] Building C object lib/CMakeFiles/cyusbserial.dir/cyusb.c.o
-[ 20%] Building C object lib/CMakeFiles/cyusbserial.dir/cyuart.c.o
-[ 30%] Building C object lib/CMakeFiles/cyusbserial.dir/cyi2c.c.o
-[ 40%] Building C object lib/CMakeFiles/cyusbserial.dir/cyspi.c.o
-[ 50%] Building C object lib/CMakeFiles/cyusbserial.dir/cyphdc.c.o
-[ 60%] Building C object lib/CMakeFiles/cyusbserial.dir/cyjtag.c.o
-[ 70%] Building C object lib/CMakeFiles/cyusbserial.dir/cymisc.c.o
-[ 80%] Linking C shared library libcyusbserial.so
-[ 80%] Built target cyusbserial
-Scanning dependencies of target cyusbserialtest
-[ 90%] Building C object tools/CMakeFiles/cyusbserialtest.dir/cyusbserialtest.c.o
-[100%] Linking C executable cyusbserialtest
-[100%] Built target cyusbserialtest
-[ 80%] Built target cyusbserial
-[100%] Built target cyusbserialtest
-Install the project...
--- Install configuration: ""
--- Installing: /usr/local/include/CyUSBSerial.h
--- Installing: /usr/local/lib/libcyusbserial.so.1
--- Installing: /usr/local/lib/libcyusbserial.so
--- Set runtime path of "/usr/local/lib/libcyusbserial.so.1" to ""
--- Installing: /usr/local/bin/cyusbserialtest
--- Set runtime path of "/usr/local/bin/cyusbserialtest" to ""
-DONE!
-Library installation complete.
-Going back...
-DONE!
-Entering the TinI/O build directory
-DONE!
 </code>
 </pre>
 </details>
@@ -114,69 +270,120 @@ If a part of the installation process fails, the script will abort the installat
 
 ## The hard way
 
-In case the automated installation fails, or if you specifically want to build TinI/O manually, you can build TinI/O with a GNU Makefile and the library for it with CMake. The order of installation is important: the library must be built before TinI/O, because TinI/O needs the library to be built.
-To build the library, go to the `cylib/build` directory and run `cmake ..` folowed by `make` and `make install` __as root__. The output should look similiar to this:
+In case the automated installation fails, or if you specifically want to build TinI/O manually, you can build TinI/O, the library for it, the flasher tool and the flash files with Makefiles. The order of installation is important: the library must be built first, because TinI/O and the flasher depend on it.
+
+To build the library, go to the `cylib` directory and run `make`. The output will contain some warnings, which should be ignored. The output should look like this:
+  ```
+  make
+  gcc -fPIC -g -Wall -o libcyusb.o -c cyusb.c -I ../../common/header
+  cyusb.c: In function ‘CyOpen’:
+  cyusb.c:556:1: warning: ‘rStatus’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+  printf("rstatus6 %d", rStatus);
+  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  gcc -fPIC -g -Wall -o libcyuart.o -c cyuart.c -I ../../common/header
+  gcc -fPIC -g -Wall -o libcyi2c.o -c cyi2c.c -I ../../common/header
+  gcc -fPIC -g -Wall -o libcyspi.o -c cyspi.c -I ../../common/header
+  gcc -fPIC -g -Wall -o libcyphdc.o -c cyphdc.c -I ../../common/header
+  gcc -fPIC -g -Wall -o libcyjtag.o -c cyjtag.c -I ../../common/header
+  gcc -fPIC -g -Wall -o libcymisc.o -c cymisc.c -I ../../common/header
+  gcc -fPIC -g -Wall -o libcyboot.o -c cyboot.c -I ../../common/header
+  cyboot.c:72:0: warning: "CY_USB_SERIAL_TIMEOUT" redefined
+  #define CY_USB_SERIAL_TIMEOUT 0
+
+  In file included from cyboot.c:1:0:
+  CyUSBCommon.h:74:0: note: this is the location of the previous definition
+  #define CY_USB_SERIAL_TIMEOUT 5000
+
+  cyboot.c: In function ‘CyFlashConfigEnable’:
+  cyboot.c:634:21: warning: unused variable ‘ioTimeout’ [-Wunused-variable]
+      UINT32 rStatus, ioTimeout = CY_USB_SERIAL_TIMEOUT;
+                      ^~~~~~~~~
+  gcc -shared -g -Wl,-soname,libcyusbserial.so -o libcyusbserial.so.1 libcyusb.o libcyuart.o libcyi2c.o libcyspi.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o -l usb-1.0
+  cp libcyusbserial.so.1 /usr/local/lib
+  ln -sf /usr/local/lib/libcyusbserial.so.1 /usr/local/lib/libcyusbserial.so
+  ldconfig
+  rm -f libcyusb.o libcyuart.o libcyspi.o libcyi2c.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o
+  ```
+
+If the library builds succesfully, build the flasher tool next by going into the `tool` directory in the project root and running `make`. Again, the output will contain some warnings and notes that are tobe ignored.
+The output should look like this:
+
 ```
-# cd cylib/build
-# cmake ..
--- The C compiler identification is GNU 6.4.0
--- Check for working C compiler: /usr/bin/cc
--- Check for working C compiler: /usr/bin/cc -- works
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Detecting C compile features
--- Detecting C compile features - done
--- Found PkgConfig: /usr/bin/pkg-config (found version "0.29")
--- Checking libusb version...
--- libusb version: 1.0.9
+make
+#	gcc -g -o CyUSBSerialTestUtility Test_Utility.c -lcyusbserial -w
+gcc -g -o CyUSBSerialCommandUtility Command_Utility.c -lcyusbserial
+Command_Utility.c: In function ‘deviceHotPlug’:
+Command_Utility.c:102:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     rStatus = CyGetListofDevices (&numDevices);
+                                   ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:105:16: warning: ‘return’ with a value, in function returning void
+         return rStatus;
+                ^~~~~~~
+Command_Utility.c:95:6: note: declared here
+ void deviceHotPlug () {
+      ^~~~~~~~~~~~~
+Command_Utility.c:107:5: warning: implicit declaration of function ‘printListOfDevices’ [-Wimplicit-function-declaration]
+     printListOfDevices (false);
+     ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: In function ‘main’:
+Command_Utility.c:139:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     rStatus = CyGetListofDevices (&numDevices);
+                                   ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:268:51: warning: passing argument 2 of ‘CyReadDeviceConfig’ from incompatible pointer type [-Wincompatible-pointer-types]
+                 rStatus=CyReadDeviceConfig(handle,&read_buffer);
+                                                   ^
+In file included from Command_Utility.c:34:0:
+../../common/header/CyUSBBootloader.h:203:45: note: expected ‘UCHAR * {aka unsigned char *}’ but argument is of type ‘unsigned char (*)[512]’
+ CYWINEXPORT CY_RETURN_STATUS  WINCALLCONVEN CyReadDeviceConfig (
+                                             ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: At top level:
+Command_Utility.c:382:6: warning: conflicting types for ‘printListOfDevices’
+ void printListOfDevices (bool isPrint)
+      ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:107:5: note: previous implicit declaration of ‘printListOfDevices’ was here
+     printListOfDevices (false);
+     ^~~~~~~~~~~~~~~~~~
+Command_Utility.c: In function ‘printListOfDevices’:
+Command_Utility.c:396:25: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
+     CyGetListofDevices (&numDevices);
+                         ^
+In file included from Command_Utility.c:33:0:
+../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
+ CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
+                              ^~~~~~~~~~~~~~~~~~
+Command_Utility.c:445:75: warning: backslash and newline separated by space
+               printf ("%d             |%x  |%x    | %d     | %s\n", \
 
--- Looking for pthread.h
--- Looking for pthread.h - found
--- Looking for pthread_create
--- Looking for pthread_create - not found
--- Looking for pthread_create in pthreads
--- Looking for pthread_create in pthreads - not found
--- Looking for pthread_create in pthread
--- Looking for pthread_create in pthread - found
--- Found Threads: TRUE
-CMake Warning at lib/CMakeLists.txt:86 (message):
-
-
- libusb >= 1.0.16 is HIGHLY recommended.  If you experience issues or poor
- performance, please try updating libusb.
-
- Detected version: 1.0.9
-
-
-
--- Configuring done
--- Generating done
--- Build files have been written to: /root/projekti/CyUSB/cylib/build
-# make
-Scanning dependencies of target cyusbserial
-[ 10%] Building C object lib/CMakeFiles/cyusbserial.dir/cyusb.c.o
-[ 20%] Building C object lib/CMakeFiles/cyusbserial.dir/cyuart.c.o
-[ 30%] Building C object lib/CMakeFiles/cyusbserial.dir/cyi2c.c.o
-[ 40%] Building C object lib/CMakeFiles/cyusbserial.dir/cyspi.c.o
-[ 50%] Building C object lib/CMakeFiles/cyusbserial.dir/cyphdc.c.o
-[ 60%] Building C object lib/CMakeFiles/cyusbserial.dir/cyjtag.c.o
-[ 70%] Building C object lib/CMakeFiles/cyusbserial.dir/cymisc.c.o
-[ 80%] Linking C shared library libcyusbserial.so
-[ 80%] Built target cyusbserial
-Scanning dependencies of target cyusbserialtest
-[ 90%] Building C object tools/CMakeFiles/cyusbserialtest.dir/cyusbserialtest.c.o
-[100%] Linking C executable cyusbserialtest
-[100%] Built target cyusbserialtest
-# make install
-[ 80%] Built target cyusbserial
-[100%] Built target cyusbserialtest
-Install the project...
--- Install configuration: ""
--- Up-to-date: /usr/local/include/CyUSBSerial.h
--- Installing: /usr/local/lib/libcyusbserial.so.1
--- Up-to-date: /usr/local/lib/libcyusbserial.so
--- Set runtime path of "/usr/local/lib/libcyusbserial.so.1" to ""
--- Installing: /usr/local/bin/cyusbserialtest
--- Set runtime path of "/usr/local/bin/cyusbserialtest" to ""
+cp 90-cyusb.rules /etc/udev/rules.d
+cp CyUSBSerialCommandUtility /usr/bin/cy-config
+cp CyUSBSerial.sh /usr/bin
+chmod 777 /usr/bin/CyUSBSerial.sh
 ```
-After the succesful library installation, go to the `tinio` directory in the package root and run `make` and `make install` __as root__. The output should look similar to this:
+
+After the succesful installation of the flasher tool, install TinI/O by going into the `tinio` directory in the project root and running `make && make install`. The output should look like this:
+
+```
+make && make install
+echo "Building tinio..."
+Building tinio...
+g++ -lcyusbserial tinio.cpp -o tinio
+echo "done."
+done.
+echo "Installing tinio..."
+Installing tinio...
+mkdir -p /usr/share/tinio
+cp -r flash /usr/share/tinio
+cp tinio /usr/bin
+echo "done."
+done.
+```
+
+If TinI/O installs succesfully, the installation is completed. Proceed to the next chapter.
