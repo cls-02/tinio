@@ -1,5 +1,5 @@
 // Tinio - the Tiny I/O tool
-#include "include/CyUSBSerial.h"
+#include <CyUSBSerial.h>
 #include <ctype.h>
 #include <libusb.h>
 #include <stdint.h>

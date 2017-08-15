@@ -25,24 +25,30 @@ echo "    --------------------------" #fancy banner!
 echo "    Autobuilder for TinI/O 0.1"
 echo "    --------------------------"
 echo "    Verifying main directory..."
-[ -d cylib ] && [ -d tinio ] && proceed=1 #check if we're in the right dir
+[ -d configutility ] && [ -d tinio ] && proceed=1 #check if we're in the right dir
 proceed #error check
 echo "    DONE!"
 echo "    Entering the library directory..."
-cd cylib/build && proceed=1 #cd to the lib dir
+cd cylib && proceed=1 #cd to the lib dir
 proceed #error check
 echo "    DONE!"
 echo "    Compiling and installing the library..."
-cmake .. && make && sudo make install && proceed=1  #compiles the lib
-                                                    #according to the lib docs
+make && proceed=1  #compiles the lib according to the lib docs
 proceed
 echo "    DONE!"
 echo "    Library installation complete."
 echo "    Going back..."
-cd ../.. && proceed=1 #goes from cylib/build to cylib then to main dir
+cd .. && proceed=1 #to main dir
 proceed
 echo "    DONE!"
 sleep 1 # sleep for 1 sec to let the user see the output
 echo "    Entering the TinI/O build directory"
 cd tinio && proceed=1
 echo "    DONE!"
+proceed
+echo "    Compiling TinI/O..."
+cd tinio && make && make install && proceed=1
+proceed
+echo "    DONE!"
+echo "    Compiling the flasher tool"
+cd ../tool && make && proceed=1
