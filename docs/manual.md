@@ -1,167 +1,89 @@
-# TinI/O manual
+# Welcome to the TinI/O Manual!
 
---------------------------------------------------------------------------------
+Welcome to the TinI/O manual. In this document you can find information about installing, configuring and using TinI/O, the simple interface to I/O.
 
-# 1. Introduction to TinI/O
+-----
 
-## 1.1 What is TinI/O?
+# What is TinI/O?
+Simply put, TinI/O is a Linux CLI program that, when combined with a certain chip, adds more general purpose input/output (GPIO) pins to your computer. They can then be used to control custom electronics outside the computer, for example a MOSFET driving a fan, a LED, a sensor or anything that can be controlled or read from with logic ones and zeros. That certain chip is in this case, the [Cypress CY7C65211 USB-Serial Bridge Controller](http://www.cypress.com/products/usb-uart-controller-gen-2). TinI/O sends commands to it over USB using [the libcyusbserial library](https://github.com/cyrozap/libcyusbserial) made by cyrozap and [the libusb library](http://libusb.info/). When the chip recieves the command, it changes or reads the state of the requested GPIO pin.
 
-TinI/O (or tinio) is a program that makes Linux computers with USB GPIO-capable and expands the existing capabilities on GPIO-enabled computers. It does that with its hardware counterpart, [the Cypress CY7C65211 USB-Serial chip][chip].
+Using TinI/O is free (as beer _and_ speech), because it's licensed under GNU General Public License. You can use it free of any charges, but you need a TinI/O compatible board ([like this one](http://www.cypress.com/documentation/development-kitsboards/psoc-4-cy8ckit-049-4xxx-prototyping-kits)), that (at the time of writing) costs $4 at Cypress.com.
 
-## 1.2 What features does TinI/O have?
-
--   It can make any Linux computer GPIO enabled
--   It's tremendously easy to install and use
--   It runs as a standalone program that can be easily integrated into other programs via system() calls
--   It consumes almost none of the host computer's resources, because it never runs in the background
--   It's compatible with almost every Linux system that has USB, including the embedded and older ones
--   It operates over USB 1.1, which makes TinI/O compatible even with the oldest of USB-enabled computers
-
-## 1.3 How does it work?
-
-TinI/O can't provide GPIO by itself. Its capabilites rely on its chip companion, the Cypress ([CY7C65211][chip]), libusb and cyrozap's libcyusbserial library. When TinI/O is ran, it processes its arguments and sends commands to the chip with those libraries. The chip then changes its GPIO pins' states accordingly. However, there are some hardware limitations to that. The GPIO is digital-only, with no PWM, interrupts or ADCs. It's designed to be simple to minimize the amount of experience and knowledge needed, to straighten learning curves and not to be another conglomerate of libraries and C-like languages that some MCU platforms have become over the last decade.
-## 1.4 Under what license can I use it?
-
-TinI/O is licensed under the GNU General Public License, which is publicly available at <http://www.gnu.org/licenses/gpl.html> and in the COPYING file in the `docs` directory in the project's root.
-The library it depends on is licensed under LGPL. Refer to the `cylib` subfolder fore more info.
-# 2. Installing
-
-## 2.1 What you should know
-
-TinI/O binaries aren't available yet, but that shouldn't pose a problem, because TinI/O is very easy to build, even for people not familiar with program building procedures.
-
-TinI/O requires some quite basic system requirements, so before you proceed, make sure that you have:
-
--   a working C and C++ compiler (**a working C++ is a working C compiler, but not the other way round!**)
--   installed libusb
--   GNU Make and cmake
-
-## 2.2 Manual build
-
-_This chapter explains how to build TinI/O manually. If you don't feel comfortable or don't want to build it manually, skip this chapter._
-
-The TinI/O build process is pretty common. It's automated with a makefile, common to most *nix build processes. It has 4 build targets:
-
- |  **Target**  |  **Description**  |
- |  ----------- |  ---------------- |
- |  _default_  |  The default target. Calls _utils_ and _tinio_ targets.  |
- |  _tinio_    |  Builds main TinI/O program.  |
- |  _utils_    |  Builds the flasher utility.  |
- |  _install_  |  Installs TinI/O and the flasher utility to /usr/bin and the flash files to /usr/bin/tinio/flashes  |
-
-### 2.2.1 Building the Library
-
-To communicate with the chip, TinI/O needs [a dedicated library written by cyrozap][cylib] that comes with TinI/O but needs to be built separately. To do that, run `cmake .. && make && sudo make install` inside the `cylib/build` directory in the project root.
-
-### 2.2.2 Building everything else
-
-To complete the installation process, run `make && make install` in the `tinio` directory in the project root. That will build and install the flasher utility and TinI/O itself.
-
-## 2.1 The `autobuilder`
-
-Because some people don't like manual binary building, TinI/O comes with the `autobuilder` shell script, which allows non-experienced users to install TinI/O without knowing much about GNU Make, GCC and other tools that are used to build it. It's very minimalistic: the only thing it does is following the manual build process described in the previous chapter and checks forany errors at the end of each step.
-
-The `autobuilder`-automated build process is simple. You just need to run the script, which will do a typical TinI/O instalation.
-
-# 3. After the installation
-
-After the installation of TinI/O, you actually don't need to do anything at all with _it_. The next step is to prepare the actual device you'll be using TinI/O with.
-
-## 3.1 Flashing the chips
+# Where to start?
+To start using TinI/O, make sure you have:
+- A computer running some sort of Linux that has:
+  + A free USB port to use the board with
+  + libusb 1.0 and its headers installed
+  + 16 MB of free space (or 8 for the bare minimum)
+  + A C and C++ compiler (preferably gcc and g++)
 
 
-Cypress CY7C65211 can be flashed only from Windows with a dedicated Cypress utility due to its unique flash file format. Fortunately, after some bargaining with Cypress I got a Linux utility that is licensed under LGPL and free (as speech _and_ beer). It can flash special, decoded versions of flash files that can be produced with a special Windows decoder executable that I can't provide with TinI/O because it's not GPL'd (actually it's not even licensed!) and isn't released to the public (yet). Instead the TinI/O package includes 2 already decoded flash files that should satisfy the needs of a typical user. Their names are:
+- A TinI/O compatible board
 
--   `5-5_decoded.cyusbd`, that provides 5 input and 5 output ports
--   `3-3cs_decoded.cyusbd`, that provides 3 input and 3 output ports, plus a CapSense button with its dedicated input.
+  They can be obtained from Cypress, the manufacturer of the chip. The board I personally use and recommend is the [CY8CKIT-049-4xxx PSoC4 prototyping kit](http://www.cypress.com/documentation/development-kitsboards/psoc-4-cy8ckit-049-4xxx-prototyping-kits), but there are more of them out there, for example, the [CYUSBS234 USB-Serial (Single Channel) Development Kit](http://www.cypress.com/documentation/development-kitsboards/cyusbs234-usb-serial-single-channel-development-kit).
 
-And they provide the following configurations:
-_Table 3.1.1: Flash files configuration_
+# Building and installing TinI/O
+Installing TinI/O is very easy - just `cd` inside the `tinio` directory and run `make`. When the installation completes, run `make install`. With everything installed, proceed to the next chapter.
 
- |  parameter  |  value in `5-5_decoded.cyusbd`  |  value in `3-3cs_decoded.cyusbd` |
- | ----------- | ----------- | ------------ |
- |  **USB**  |   |   |
- |  Max. current drawn from USB  |  350 mA  |  350 mA  |
- |  USB device class  |  PHDC  |  PHDC  |
- |  USB ID (vid:pid)  |  0x04b4:0004 (Cypress)  |  0x04b4:0004 (Cypress)  |
- |  Manufacturer string  |  TinI/O  |  TinI/O  |
- |  Product string  |  5/5  |  3/3CS  |
- |  **Serial**  |   |   |
- |  UART Tx/Rx pins  |  5(Tx)/6(Rx)  |  5/6  |
- |  UART Speed  |  9600 baud  |  9600 baud  |
- |  UART Data/Stop bits  |  8/1  |  8/1  |
- |  UART Parity  |  None  |  None  |
- |  **I/O**  |   |   |
- |  I/O logic level  |  LVTTL  |  LVTTL  |
- |  Pin 0  |  Input  |  **RESERVED for CapSense** Should be decoupled to ground by a 2n2 capacitor  |
- |  Pin 1  |  Input  |  Input  |
- |  Pin 2  |  Input  |  **RESERVED for CapSense** CapSense sense (connect to your button)  |
- |  Pin 3  |  Input  |  **RESERVED for CapSense** CapSense output (the output of your button)  |
- |  Pin 4  |  Input  |  Input  |
- |  Pin 5  |  **RESERVED** UART Tx  |  UART Tx  |
- |  Pin 6  |  **RESERVED** UART Rx  |  UART Rx  |
- |  Pin 7  |  Output  |  Input  |
- |  Pin 8  |  Output  |  Output  |
- |  Pin 9  |  Output  |  Output  |
- |  Pin 10  |  Output  |  Output  |
- |  Pin 11  |  Output  |  Input  |
+# Flashing the board
+Before you use your board with TinI/O, you must program its chip with a custom flash file that will make the board compatible with TinI/O. The flash files are located in the `/usr/share/tinio/flash` directory and can be flashed to the board with the installed `cy-config` utility. There are 2 flash files with slightly different pin configurations: `5-5.cyusbd` and  `3-3cs.cyusbd`. The 5-5 file sets half (5) of the GPIO pins as outputs and the other half as inputs. The 3-3cs sets 3 of the pins as outputs and 4 as inputs and 1 pin as a CapSense capacitive touch button and 1 as its output. See the table for the exact pin configuration:
 
-_Note: Not all of the information here is neccesary to know when using TinI/O.
-For a stripped-down version refer to the next chapter, "Using TinI/O"_
+| GPIO Pin  |  5-5 config  |  3-3cs config |
+|  ---  |  ---  |  --- |
+| 0  | Input | RESERVED - decouple to ground with a 2n2 capacitor |
+| 1 | Input | Input |
+| 2 | Input | Capsense button - connect to a metal button surface |
+| 3 | Input | Capsense out - connect to an input to read |
+| 4 | Input | Input|
+| 5 | UART Tx - Don't connect | UART Tx - Don't connect |
+| 6 | UART Rx - Don't connect | UART Rx - Don't connect |
+| 7 | Output | Input |
+| 8 | Output | Output |
+| 9 | Output | Output |
+| 10 | Output | Output |
+| 11 |  Output | Input |
 
-Please notice that flashing of these files isn't the only way of configuring chips. They can be also customized with the Windows utility. When configuring chips with it, you should pay attention to keeping USB settings as described in the table, as TinI/O can't communicate with unproperly configured devices.
-
-## 3.2 The `cy-config` utility
-The flash files I covered in the previous chapter can be flashed with the `cy-config` utility that installs with TinI/O. The utility is text-based. It can be used by running `cy-config`. Upon execution, it prints out a list of USB devices
+After you've decided which configuration you'll use, run the configuration utility with the path of the flash file as an argument , e.g.:`cy-config /usr/share/tinio/flash/5-5.cyusbd`.
+A menu will appear:
 ```
-#cy-config <path to the decrypted flash file>
-
 
 ---------------------------------------------------------------------------------
-Device Number  |  VID  |  PID  |  INTERFACE NUMBER  |  FUNCTIONALITY
+Device Number | VID | PID | INTERFACE NUMBER | FUNCTIONALITY
 ---------------------------------------------------------------------------------
-0              | 1d6b   | 1     |  0      |  NA
-1              | 8bb   | 2902     |  0      |  NA
-1              | 8bb   | 2902     |  1      |  NA
-1              | 8bb   | 2902     |  2      |  NA
-1              | 8bb   | 2902     |  3      |  NA
-2              | 17e9   | 101     |  0      |  NA
-3              | 1d6b   | 1     |  0      |  NA
-4              | 424   | 2504     |  0      |  NA
-5              | 1d6b   | 1     |  0      |  NA
-6              | 413c   | 3016     |  0      |  NA
-7              | 1d6b   | 2     |  0      |  NA
-8              | 1d6b   | 1     |  0      |  NA
-9              | 4b4   | 4     |  0      |  NA
-9              | 4b4   | 4     |  1      |  NA
-10              | 1d6b   | 1     |  0      |  NA
-11              | 461   | 10     |  0      |  NA
-11              | 461   | 10     |  1      |  NA
-12              | d8c   | c     |  0      |  NA
-12              | d8c   | c     |  1      |  NA
-12              | d8c   | c     |  2      |  NA
-12              | d8c   | c     |  3      |  NA
-13              | 1d6b   | 2     |  0      |  NA
-14              | bda   | 111     |  0      |  NA
+0             |1d6b  |2    | 0     | NA
+1             |413c  |3016    | 0     | NA
+2             |461  |10    | 0     | NA
+2             |461  |10    | 1     | NA
+3             |1d6b  |1    | 0     | NA
+4             |8bb  |2902    | 0     | NA
+4             |8bb  |2902    | 1     | NA
+4             |8bb  |2902    | 2     | NA
+4             |8bb  |2902    | 3     | NA
+5             |4b4  |4    | 0     | NA
+5             |4b4  |4    | 1     | NA
+6             |1d6b  |1    | 0     | NA
+7             |1d6b  |1    | 0     | NA
+8             |1d6b  |2    | 0     | NA
+9             |1d6b  |1    | 0     | NA
+10             |1d6b  |1    | 0     | NA
 ---------------------------------------------------------------------------------
 
-Cydevices 15-------------------------------------------------------------------
+Cydevices 11-------------------------------------------------------------------
 1: Print list of devices
 2: Select device...No device selected !!
 ```
-At this point, you can either choose to rescan (1) or to choose a device to program (2). The rescan may help detecting new devices, but the second option should be selected for (re)programing the chip. Upon selecting it, it requests a device number:
+At this point, you want to look for the device `4b4` in the VID column. Find its device number. In the example above, the device we're looking for has the device number 5. Select the `Select Device` option in the menu by entering `2`.
 ```
 2
 Enter Device number to be selected..
-
 ```
-At this point should look at the device printout and search for a device with a Cypress VID (`4b4`, refer to the table 3.1.1) and enter its number (in this case 9). After that, the utility will ask for the interface number to use:
+Enter the device number you remembered in the previous step.
 ```
-9
+5
 Enter interface number..
-
 ```
-You should enter the last interface number listed in the printout, for devices already programmed for use with TinI/O this would usually be 1, for factory programmed devices from Cypress it's usually 2, but those predictions aren't always right. In this case, it's 1 because the device is already programmed for TinI/O.
+Enter __the device's highest interface number in the table__. In the example it's 1, but it can also be 2.
+
 ```
 1
 
@@ -172,60 +94,60 @@ You should enter the last interface number listed in the printout, for devices a
  File stream closed
 -------------------------------------------------------------------
 1: Print list of devices
-2: Change device selection--selected device: [Device number 9] : [Interface No 1] : NA
+2: Change device selection--selected device: [Device number 5] : [Interface No 1] : NA
+^C
 ```
-Such output indicates that the chip was succesfully programmed and the utility can be exited (Ctrl-C).
+This is how a successful flashing output should look like. If it doesn't:
++ If it gives you a fopen() error, the file you tried to flash doesn't exist or (rarely happens, but still) has a too long path. Find the file or move it to a less obscure folder.
++ Make sure you used a right device and file
++ Try running the utility as root
 
-# 4.Using TinI/O
-## 4.1 The hardware
-There is no dedicated TinI/O board out there, instead, the ([Cypress CY8CKIT-049][cykit]) is used. Its smaller part provides you with 12 GPIO pins, which can be configured in those two ways as described in the previous chapter:
+## Creating your own configs
+If you want to program your device your own way, you can do it with Cypress' [USB-Serial Configuration Utility](http://www.cypress.com/documentation/software-and-drivers/usb-serial-software-development-kit). However, you must follow some guidelines to make your configuration TinI/O compatible.
 
-|  Pin  |  5in/5out config  |  3in/3out config w/Capsense  |
-|  ---  |  ---  |  --- |
-| 0  | Input | RESERVED decouple to ground with a 2n2 capacitor |
-| 1 | Input | Input |
-| 2 | Input | Capsense button |
-| 3 | Input | Capsense out |
-| 4 | Input | Input|
-| 5 | UART Tx | |
-| 6 | UART Rx | |
-| 7 | Output | Input |
-| 8 | Output | Output |
-| 9 | Output | Output |
-| 10 | Output | Output |
-| 11 |  Output | Input |
+The device must be configured to:
++ PHDC Interface
++ UID and VID left default
++ SCB: UART 2-pin
 
+# Using TinI/O
+TinI/O is pretty simple to use. To see a quick usage reminder, run `tinio` in the terminal, but here's a more extensive
+## Usage
 
-## 4.2 The software
-TinI/O isn't particularly difficult to use, because it's very simple in its design (Like, common guys, how complex and obfuscated can a code written by a 14-years-old kid be?). The bare minimum that you need to know to use TinI/O is only its name. Example:
-```
-#tinio
-TinI/0 0.1
-Usage:
-tinio <options>
-The supported options are:
--d<device number> - specifies the desired device - integer 0 to 15
--i<interface number - specifies the USB interface number - integer 0 to 255
--s<pin number> - sets the specified pin to the value specified with -v  - integer 0 to 11
--r<pin number> - reads the specified pin's value and prints it to the stdout - integer 0 to 11
--v<value> - value for -s option - integer 0 to 1
--e - enables expert mode (enables additional pins)
-```
-As you can clearly see, there isn't a lot to memorize, but if that's still too much for you, memorize the `-s`,`-r` and the `-v` option that are used to read and write to the chip's GPIO.
-A few examples:
-`tinio -r8` -Reads the state of the pin 8 and outputs it to the stdout
-`tinio -s7 -v1` -Turns the 7th pin on
+| __Option__ | __Action__ |
+|------------|------------|
+| -d<num> | Sets the device number. 0 if left out. Up to 15 devices. |
+| -i<num> | Sets the interface number. 0 if left out. 0-255. |
+| -s<pin> | Sets the specified pin's value to the value specified with the -v option. 0-11. |
+| -r<pin> | Reads the pin's value and outputs it to the stdout. 0-11. |
+| -v<val> | Specifies the output value. Either 0 or 1, other numbers default to 1. |
+| -e      | Enables expert mode. The expert mode enables you to write to reserved pins (5&6) and shouldn't be enabled unless you know what you're doing. |
 
-The other options that you may use are `-d`, `-i` and `-e`. The `-d` option can be used when dealing with more than one connected device to select the one you want to work on. It's also important to know that there is absolutely no assurance that the devices will stay in order, which is the reason why wouldn't recommend using this option.
-The `-i` option selects the USB interface number and doesn't need to be used in a typical used case as it defaults to 0, which is tested to work with chips flashed with the provided flash files.
-The `-e` option is used to enable expert mode. Expert mode allows tampering with already-occupied pins, for example the UART transciever pins (5 and 6). It's never needed in a typical use case.
-#5. Legal stuff
-Windows is a registered trademark of Microsoft
-Linux is a registered trademark of the Linux Foundation
-Cypress is a registered trademark of Cypress
-All trademarks are property of their rightful owners. This document does not intend to violate them. If I accidentaly do that, please email me at thecodingkid.devel@gmail.com and I will do my best to fix my mistakes.
-This document is part of TinI/O, and is licensed under GNU GPL. Fell free to distribute!
-Oh, and F*ck expensive proprietary software (unless it's a dope game)!
-[chip]: http://www.cypress.com/part/cy7c65211-24ltxi
-[cylib]: http://github.com/cyrozap/libcyusbserial
-[cykit]: http://www.cypress.com/documentation/development-kitsboards/psoc-4-cy8ckit-049-4xxx-prototyping-kits
+## Practical examples
+The two basic functions of TinI/O are reading and writing to I/O on a single device:  
+- To read, run `tinio -r<pin>` with <pin> replaced with the desired pin. The result will be printed to the stdout, followed by a newline.
+- To set, run `tinio -s<pin> -v<val>` with <pin> replaced with the desired pin and <val> replaced with the value you want to write.
+
+TinI/O is capable of handling up to 16 devices at once with the `-d` option, but there isn't a reliable way of identifying them. The best way to ensure the correct device order is to look at the device tree with `lsusb` and check which device comes first - it will have the first device number (0).
+
+- To read from a specific device number, run `tinio -r<pin> -d<dev>` and replace <pin> with the pin number and <dev> with the device number.
+- To write to a specific device run `tinio -s<pin> -v<val> -d<dev>` and replace <pin> with the pin number, <val> with the value and <dev> with the device number.
+
+## Using TinI/O in your projects
++ As the TinI/O target chip (CY7C65211) isn't a microcontroller, it can't operate without a computer connected to it.
++ It can't do PWM.
++ Its I/O has 3.3V LVTTL logic level, and it's __not__ 5V compatible.
++ Its maximum output current is comparable to Arduino's at 25 mA.
++ When using CapSense, decouple the reserved 0 pin to the ground with a 2.2 nF capacitor and don't use it.
+
+# Copyright, Links, ...
+[Cypress' website](http://cypress.com)  
+[CY7C65211 Datasheet](http://http://www.cypress.com/file/139886/download)  
+[TinI/O Github](http://github.com/kristjan-komlosi/tinio)  
+[My Youtube channel - You may expect some videos of TinI/O there](https://www.youtube.com/channel/UCmcIwYA2I2YkmQs7xgMU-DA)
+
+## __Copyright disclaimer__
+No copyright infringement was intended to be made with this document or the TinI/O project. All of trademarks stated in this document are property of their owners.
+
+TinI/O is licensed under GNU GPL License.  
+This document is licensed under the GNU FDL License.
