@@ -13,7 +13,7 @@ Using TinI/O is free (as beer _and_ speech), because it's licensed under GNU Gen
 To start using TinI/O, make sure you have:
 - A computer running some sort of Linux that has:
   + A free USB port to use the board with
-  + installed libusb
+  + libusb 1.0 and its headers installed
   + 16 MB of free space (or 8 for the bare minimum)
   + A C and C++ compiler (preferably gcc and g++)
 
@@ -23,255 +23,10 @@ To start using TinI/O, make sure you have:
   They can be obtained from Cypress, the manufacturer of the chip. The board I personally use and recommend is the [CY8CKIT-049-4xxx PSoC4 prototyping kit](http://www.cypress.com/documentation/development-kitsboards/psoc-4-cy8ckit-049-4xxx-prototyping-kits), but there are more of them out there, for example, the [CYUSBS234 USB-Serial (Single Channel) Development Kit](http://www.cypress.com/documentation/development-kitsboards/cyusbs234-usb-serial-single-channel-development-kit).
 
 # Building and installing TinI/O
-
-## The easy way
-After you make sure that your computer complies with the system requirements (it probably does), you need to build and install TinI/O. The simplest way to do that is to run the `autobuilder` script in the project root (aka the folder you downloaded TinI/O source to) __as root__. The script will then start the build process and redirect any text from its underlying programs to the standard output. The output should look like this:
-
-```
-# ./autobuilder
-    --------------------------
-    Autobuilder for TinI/O 0.1
-    --------------------------
-    Verifying main directory...
-    DONE!
-    Entering the library directory...
-    DONE!
-    Compiling and installing the library...
-gcc -fPIC -g -Wall -o libcyusb.o -c cyusb.c -I ../../common/header
-cyusb.c: In function ‘CyOpen’:
-cyusb.c:556:1: warning: ‘rStatus’ may be used uninitialized in this function [-Wmaybe-uninitialized]
- printf("rstatus6 %d", rStatus);
- ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-gcc -fPIC -g -Wall -o libcyuart.o -c cyuart.c -I ../../common/header
-gcc -fPIC -g -Wall -o libcyi2c.o -c cyi2c.c -I ../../common/header
-gcc -fPIC -g -Wall -o libcyspi.o -c cyspi.c -I ../../common/header
-gcc -fPIC -g -Wall -o libcyphdc.o -c cyphdc.c -I ../../common/header
-gcc -fPIC -g -Wall -o libcyjtag.o -c cyjtag.c -I ../../common/header
-gcc -fPIC -g -Wall -o libcymisc.o -c cymisc.c -I ../../common/header
-gcc -fPIC -g -Wall -o libcyboot.o -c cyboot.c -I ../../common/header
-cyboot.c:72:0: warning: "CY_USB_SERIAL_TIMEOUT" redefined
- #define CY_USB_SERIAL_TIMEOUT 0
-
-In file included from cyboot.c:1:0:
-CyUSBCommon.h:74:0: note: this is the location of the previous definition
- #define CY_USB_SERIAL_TIMEOUT 5000
-
-cyboot.c: In function ‘CyFlashConfigEnable’:
-cyboot.c:634:21: warning: unused variable ‘ioTimeout’ [-Wunused-variable]
-     UINT32 rStatus, ioTimeout = CY_USB_SERIAL_TIMEOUT;
-                     ^~~~~~~~~
-gcc -shared -g -Wl,-soname,libcyusbserial.so -o libcyusbserial.so.1 libcyusb.o libcyuart.o libcyi2c.o libcyspi.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o -l usb-1.0
-cp libcyusbserial.so.1 /usr/local/lib
-ln -sf /usr/local/lib/libcyusbserial.so.1 /usr/local/lib/libcyusbserial.so
-ldconfig
-rm -f libcyusb.o libcyuart.o libcyspi.o libcyi2c.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o
-    DONE!
-    Library installation complete.
-    Going back...
-    DONE!
-    Entering the TinI/O build directory
-    DONE!
-    Compiling TinI/O
-echo "Building tinio..."
-Building tinio...
-g++ -lcyusbserial tinio.cpp -o tinio
-echo "done."
-done.
-echo "Installing tinio..."
-Installing tinio...
-cp tinio /usr/bin
-echo "done."
-done.
-    DONE!
-    Compiling the flasher tool
-#	gcc -g -o CyUSBSerialTestUtility Test_Utility.c -lcyusbserial -w
-gcc -g -o CyUSBSerialCommandUtility Command_Utility.c -lcyusbserial
-Command_Utility.c: In function ‘deviceHotPlug’:
-Command_Utility.c:102:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
-     rStatus = CyGetListofDevices (&numDevices);
-                                   ^
-In file included from Command_Utility.c:33:0:
-../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
- CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
-                              ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:105:16: warning: ‘return’ with a value, in function returning void
-         return rStatus;
-                ^~~~~~~
-Command_Utility.c:95:6: note: declared here
- void deviceHotPlug () {
-      ^~~~~~~~~~~~~
-Command_Utility.c:107:5: warning: implicit declaration of function ‘printListOfDevices’ [-Wimplicit-function-declaration]
-     printListOfDevices (false);
-     ^~~~~~~~~~~~~~~~~~
-Command_Utility.c: In function ‘main’:
-Command_Utility.c:139:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
-     rStatus = CyGetListofDevices (&numDevices);
-                                   ^
-In file included from Command_Utility.c:33:0:
-../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
- CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
-                              ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:268:51: warning: passing argument 2 of ‘CyReadDeviceConfig’ from incompatible pointer type [-Wincompatible-pointer-types]
-                 rStatus=CyReadDeviceConfig(handle,&read_buffer);
-                                                   ^
-In file included from Command_Utility.c:34:0:
-../../common/header/CyUSBBootloader.h:203:45: note: expected ‘UCHAR * {aka unsigned char *}’ but argument is of type ‘unsigned char (*)[512]’
- CYWINEXPORT CY_RETURN_STATUS  WINCALLCONVEN CyReadDeviceConfig (
-                                             ^~~~~~~~~~~~~~~~~~
-Command_Utility.c: At top level:
-Command_Utility.c:382:6: warning: conflicting types for ‘printListOfDevices’
- void printListOfDevices (bool isPrint)
-      ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:107:5: note: previous implicit declaration of ‘printListOfDevices’ was here
-     printListOfDevices (false);
-     ^~~~~~~~~~~~~~~~~~
-Command_Utility.c: In function ‘printListOfDevices’:
-Command_Utility.c:396:25: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
-     CyGetListofDevices (&numDevices);
-                         ^
-In file included from Command_Utility.c:33:0:
-../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
- CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
-                              ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:445:75: warning: backslash and newline separated by space
-               printf ("%d             |%x  |%x    | %d     | %s\n", \
-
-cp 90-cyusb.rules /etc/udev/rules.d
-cp CyUSBSerialCommandUtility /usr/bin/cy-config
-cp CyUSBSerial.sh /usr/bin
-chmod 777 /usr/bin/CyUSBSerial.sh
-    DONE!
-
-
-
-The TinI/O installation is completed.
-
-```
-
-If a part of the installation process fails, the script will abort the installation and print out: `Error! The last action autobuild tried to perform failed.` In such case, try also the manual installation described below. If your installation completes succesfully, proceed to the next chapter.
-
-## The hard way
-
-In case the automated installation fails, or if you specifically want to build TinI/O manually, you can build TinI/O, the library for it, the flasher tool and the flash files with Makefiles. The order of installation is important: the library must be built first, because TinI/O and the flasher depend on it.
-
-To build the library, go to the `cylib` directory and run `make`. The output will contain some warnings, which should be ignored. The output should look like this:
-  ```
-  make
-  gcc -fPIC -g -Wall -o libcyusb.o -c cyusb.c -I ../../common/header
-  cyusb.c: In function ‘CyOpen’:
-  cyusb.c:556:1: warning: ‘rStatus’ may be used uninitialized in this function [-Wmaybe-uninitialized]
-  printf("rstatus6 %d", rStatus);
-  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  gcc -fPIC -g -Wall -o libcyuart.o -c cyuart.c -I ../../common/header
-  gcc -fPIC -g -Wall -o libcyi2c.o -c cyi2c.c -I ../../common/header
-  gcc -fPIC -g -Wall -o libcyspi.o -c cyspi.c -I ../../common/header
-  gcc -fPIC -g -Wall -o libcyphdc.o -c cyphdc.c -I ../../common/header
-  gcc -fPIC -g -Wall -o libcyjtag.o -c cyjtag.c -I ../../common/header
-  gcc -fPIC -g -Wall -o libcymisc.o -c cymisc.c -I ../../common/header
-  gcc -fPIC -g -Wall -o libcyboot.o -c cyboot.c -I ../../common/header
-  cyboot.c:72:0: warning: "CY_USB_SERIAL_TIMEOUT" redefined
-  #define CY_USB_SERIAL_TIMEOUT 0
-
-  In file included from cyboot.c:1:0:
-  CyUSBCommon.h:74:0: note: this is the location of the previous definition
-  #define CY_USB_SERIAL_TIMEOUT 5000
-
-  cyboot.c: In function ‘CyFlashConfigEnable’:
-  cyboot.c:634:21: warning: unused variable ‘ioTimeout’ [-Wunused-variable]
-      UINT32 rStatus, ioTimeout = CY_USB_SERIAL_TIMEOUT;
-                      ^~~~~~~~~
-  gcc -shared -g -Wl,-soname,libcyusbserial.so -o libcyusbserial.so.1 libcyusb.o libcyuart.o libcyi2c.o libcyspi.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o -l usb-1.0
-  cp libcyusbserial.so.1 /usr/local/lib
-  ln -sf /usr/local/lib/libcyusbserial.so.1 /usr/local/lib/libcyusbserial.so
-  ldconfig
-  rm -f libcyusb.o libcyuart.o libcyspi.o libcyi2c.o libcyphdc.o libcyjtag.o libcymisc.o libcyboot.o
-  ```
-
-If the library builds succesfully, build the flasher tool next by going into the `tool` directory in the project root and running `make`. Again, the output will contain some warnings and notes that are tobe ignored.
-The output should look like this:
-
-```
-make
-#	gcc -g -o CyUSBSerialTestUtility Test_Utility.c -lcyusbserial -w
-gcc -g -o CyUSBSerialCommandUtility Command_Utility.c -lcyusbserial
-Command_Utility.c: In function ‘deviceHotPlug’:
-Command_Utility.c:102:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
-     rStatus = CyGetListofDevices (&numDevices);
-                                   ^
-In file included from Command_Utility.c:33:0:
-../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
- CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
-                              ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:105:16: warning: ‘return’ with a value, in function returning void
-         return rStatus;
-                ^~~~~~~
-Command_Utility.c:95:6: note: declared here
- void deviceHotPlug () {
-      ^~~~~~~~~~~~~
-Command_Utility.c:107:5: warning: implicit declaration of function ‘printListOfDevices’ [-Wimplicit-function-declaration]
-     printListOfDevices (false);
-     ^~~~~~~~~~~~~~~~~~
-Command_Utility.c: In function ‘main’:
-Command_Utility.c:139:35: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
-     rStatus = CyGetListofDevices (&numDevices);
-                                   ^
-In file included from Command_Utility.c:33:0:
-../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
- CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
-                              ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:268:51: warning: passing argument 2 of ‘CyReadDeviceConfig’ from incompatible pointer type [-Wincompatible-pointer-types]
-                 rStatus=CyReadDeviceConfig(handle,&read_buffer);
-                                                   ^
-In file included from Command_Utility.c:34:0:
-../../common/header/CyUSBBootloader.h:203:45: note: expected ‘UCHAR * {aka unsigned char *}’ but argument is of type ‘unsigned char (*)[512]’
- CYWINEXPORT CY_RETURN_STATUS  WINCALLCONVEN CyReadDeviceConfig (
-                                             ^~~~~~~~~~~~~~~~~~
-Command_Utility.c: At top level:
-Command_Utility.c:382:6: warning: conflicting types for ‘printListOfDevices’
- void printListOfDevices (bool isPrint)
-      ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:107:5: note: previous implicit declaration of ‘printListOfDevices’ was here
-     printListOfDevices (false);
-     ^~~~~~~~~~~~~~~~~~
-Command_Utility.c: In function ‘printListOfDevices’:
-Command_Utility.c:396:25: warning: passing argument 1 of ‘CyGetListofDevices’ from incompatible pointer type [-Wincompatible-pointer-types]
-     CyGetListofDevices (&numDevices);
-                         ^
-In file included from Command_Utility.c:33:0:
-../../common/header/CyUSBSerial.h:705:30: note: expected ‘UINT8 * {aka unsigned char *}’ but argument is of type ‘int *’
- CYWINEXPORT CY_RETURN_STATUS CyGetListofDevices (
-                              ^~~~~~~~~~~~~~~~~~
-Command_Utility.c:445:75: warning: backslash and newline separated by space
-               printf ("%d             |%x  |%x    | %d     | %s\n", \
-
-cp 90-cyusb.rules /etc/udev/rules.d
-cp CyUSBSerialCommandUtility /usr/bin/cy-config
-cp CyUSBSerial.sh /usr/bin
-chmod 777 /usr/bin/CyUSBSerial.sh
-```
-
-After the succesful installation of the flasher tool, install TinI/O by going into the `tinio` directory in the project root and running `make && make install`. The output should look like this:
-
-```
-make && make install
-echo "Building tinio..."
-Building tinio...
-g++ -lcyusbserial tinio.cpp -o tinio
-echo "done."
-done.
-echo "Installing tinio..."
-Installing tinio...
-mkdir -p /usr/share/tinio
-cp -r flash /usr/share/tinio
-cp tinio /usr/bin
-echo "done."
-done.
-```
-
-If TinI/O installs succesfully, the installation is completed. Proceed to the next chapter.
+Installing TinI/O is very easy - just `cd` inside the `tinio` directory and run `make`. When the installation completes, run `make install`. With everything installed, proceed to the next chapter.
 
 # Flashing the board
-Before you use your board with TinI/O, you must program its chip with a custom flash that will make the board compatible with TinI/O. The flash files are located in the `/usr/share/tinio/flash` directory and can be flashed to the board with the installed `cy-config` utility. There are 2 flash files with slightly different pin configurations: `5-5.cyusbd` and  `3-3cs.cyusbd`. The 5-5 file sets half (5) of the GPIO pins as outputs and the other half as inputs. The 3-3cs sets 3 of the pins as outputs and 4 as inputs and 1 pin as a CapSense capacitive touch button and 1 as its output. See the table for the exact pin configuration:
+Before you use your board with TinI/O, you must program its chip with a custom flash file that will make the board compatible with TinI/O. The flash files are located in the `/usr/share/tinio/flash` directory and can be flashed to the board with the installed `cy-config` utility. There are 2 flash files with slightly different pin configurations: `5-5.cyusbd` and  `3-3cs.cyusbd`. The 5-5 file sets half (5) of the GPIO pins as outputs and the other half as inputs. The 3-3cs sets 3 of the pins as outputs and 4 as inputs and 1 pin as a CapSense capacitive touch button and 1 as its output. See the table for the exact pin configuration:
 
 | GPIO Pin  |  5-5 config  |  3-3cs config |
 |  ---  |  ---  |  --- |
@@ -288,4 +43,110 @@ Before you use your board with TinI/O, you must program its chip with a custom f
 | 10 | Output | Output |
 | 11 |  Output | Input |
 
-To flash a configuration file
+After you've decided which configuration you'll use, run the configuration utility with the path of the flash file as an argument , e.g.:`cy-config /usr/share/tinio/flash/5-5.cyusbd`.
+A menu will appear:
+```
+
+---------------------------------------------------------------------------------
+Device Number | VID | PID | INTERFACE NUMBER | FUNCTIONALITY
+---------------------------------------------------------------------------------
+0             |1d6b  |2    | 0     | NA
+1             |413c  |3016    | 0     | NA
+2             |461  |10    | 0     | NA
+2             |461  |10    | 1     | NA
+3             |1d6b  |1    | 0     | NA
+4             |8bb  |2902    | 0     | NA
+4             |8bb  |2902    | 1     | NA
+4             |8bb  |2902    | 2     | NA
+4             |8bb  |2902    | 3     | NA
+5             |4b4  |4    | 0     | NA
+5             |4b4  |4    | 1     | NA
+6             |1d6b  |1    | 0     | NA
+7             |1d6b  |1    | 0     | NA
+8             |1d6b  |2    | 0     | NA
+9             |1d6b  |1    | 0     | NA
+10             |1d6b  |1    | 0     | NA
+---------------------------------------------------------------------------------
+
+Cydevices 11-------------------------------------------------------------------
+1: Print list of devices
+2: Select device...No device selected !!
+```
+At this point, you want to look for the device `4b4` in the VID column. Find its device number. In the example above, the device we're looking for has the device number 5. Select the `Select Device` option in the menu by entering `2`.
+```
+2
+Enter Device number to be selected..
+```
+Enter the device number you remembered in the previous step.
+```
+5
+Enter interface number..
+```
+Enter __the device's highest interface number in the table__. In the example it's 1, but it can also be 2.
+
+```
+1
+
+ File opened successfully
+
+ Bytes successfully read
+ Programming Flash is done
+ File stream closed
+-------------------------------------------------------------------
+1: Print list of devices
+2: Change device selection--selected device: [Device number 5] : [Interface No 1] : NA
+^C
+```
+This is how a successful flashing output should look like. If it doesn't:
++ If it gives you a fopen() error, the file you tried to flash doesn't exist or (rarely happens, but still) has a too long path. Find the file or move it to a less obscure folder.
++ Make sure you used a right device and file
++ Try running the utility as root
+
+## Creating your own configs
+If you want to program your device your own way, you can do it with Cypress' [USB-Serial Configuration Utility](http://www.cypress.com/documentation/software-and-drivers/usb-serial-software-development-kit). However, you must follow some guidelines to make your configuration TinI/O compatible.
+
+The device must be configured to:
++ PHDC Interface
++ UID and VID left default
++ SCB: UART 2-pin
+
+# Using TinI/O
+TinI/O is pretty simple to use. To see a quick usage reminder, run `tinio` in the terminal, but here's a more extensive
+## Usage
+
+| __Option__ | __Action__ |
+|------------|------------|
+| -d<num> | Sets the device number. 0 if left out. Up to 15 devices. |
+| -i<num> | Sets the interface number. 0 if left out. 0-255. |
+| -s<pin> | Sets the specified pin's value to the value specified with the -v option. 0-11. |
+| -r<pin> | Reads the pin's value and outputs it to the stdout. 0-11. |
+| -v<val> | Specifies the output value. Either 0 or 1, other numbers default to 1. |
+| -e      | Enables expert mode. The expert mode enables you to write to reserved pins (5&6) and shouldn't be enabled unless you know what you're doing. |
+
+## Practical examples
+The two basic functions of TinI/O are reading and writing to I/O on a single device:  
+- To read, run `tinio -r<pin>` with <pin> replaced with the desired pin. The result will be printed to the stdout, followed by a newline.
+- To set, run `tinio -s<pin> -v<val>` with <pin> replaced with the desired pin and <val> replaced with the value you want to write.
+
+TinI/O is capable of handling up to 16 devices at once with the `-d` option, but there isn't a reliable way of identifying them. The best way to ensure the correct device order is to look at the device tree with `lsusb` and check which device comes first - it will have the first device number (0).
+
+- To read from a specific device number, run `tinio -r<pin> -d<dev>` and replace <pin> with the pin number and <dev> with the device number.
+- To write to a specific device run `tinio -s<pin> -v<val> -d<dev>` and replace <pin> with the pin number, <val> with the value and <dev> with the device number.
+
+## Using TinI/O in your projects
++ As the TinI/O target chip (CY7C65211) isn't a microcontroller, it can't operate without a computer connected to it.
++ It can't do PWM.
++ Its I/O has 3.3V LVTTL logic level, and it's __not__ 5V compatible.
++ Its maximum output current is comparable to Arduino's at 25 mA.
++ When using CapSense, decouple the reserved 0 pin to the ground with a 2.2 nF capacitor and don't use it.
+
+# Copyright, Links, ...
+[Cypress' website](http://cypress.com)  
+[CY7C65211 Datasheet](http://http://www.cypress.com/file/139886/download)  
+[TinI/O Github](http://github.com/kristjan-komlosi/tinio)  
+[My Youtube channel - You may expect some videos of TinI/O there](https://www.youtube.com/channel/UCmcIwYA2I2YkmQs7xgMU-DA)
+
+## __Copyright disclaimer__
+No copyright infringement was intended to be made with this document or the TinI/O project. All of trademarks stated in this document are property of their owners.
+
+This document is licensed under the GNU FDL License.

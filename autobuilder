@@ -29,7 +29,7 @@ echo "    Verifying main directory..."
 proceed #error check
 echo "    DONE!"
 echo "    Entering the library directory..."
-cd cylib && proceed=1 #cd to the lib dir
+cd configutility/linux/cylib && proceed=1 #cd to the lib dir
 proceed #error check
 echo "    DONE!"
 echo "    Compiling and installing the library..."
@@ -38,7 +38,7 @@ proceed
 echo "    DONE!"
 echo "    Library installation complete."
 echo "    Going back..."
-cd .. && proceed=1 #to main dir
+cd ../../.. && proceed=1 #to main dir
 proceed
 echo "    DONE!"
 echo "    Entering the TinI/O build directory"
