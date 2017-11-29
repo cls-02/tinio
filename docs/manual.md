@@ -11,6 +11,7 @@ Using TinI/O is free (as beer _and_ speech), because it's licensed under GNU Gen
 
 # Where to start?
 To start using TinI/O, make sure you have:
+
 - A computer running some sort of Linux that has:
   + A free USB port to use the board with
   + libusb 1.0 and its headers installed
