@@ -18,7 +18,6 @@ const CY_VID_PID deviceVidPid{UINT16(0x04b4),
 uint8_t deviceNumList[maxDevs];
 uint8_t deviceCount;
 CY_DEVICE_INFO deviceInfoList[maxDevs];
-
 // vars for deviceOpen function
 
 CY_HANDLE deviceHandleList[maxDevs];
