@@ -47,7 +47,7 @@ bool flpPin(CY_HANDLE h, int pinNumber) {
 void parser(int argc, char **args);
 
 inErr attachHandles() {
-
+  ;
 }
 
 int main(int argc, char **args){
