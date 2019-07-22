@@ -52,6 +52,7 @@ bool flpPin(CY_HANDLE h, int pinNumber) {
 
 void parser(int argc, char **args);
 
+<<<<<<< HEAD
 void attachHandles(CY_HANDLE *h) {
   uint8_t num = 0;
   cyErrHandler(CyGetListofDevices(&num));
@@ -78,6 +79,10 @@ void attachHandles(CY_HANDLE *h) {
       miserably if the device is set to CDC mode, but custom and PHDC work fine.
   */
   // TODO: mek dis betr
+=======
+inErr attachHandles() {
+  ;
+>>>>>>> 107e36b03d1a4f9c568d462d8a245ac01a1f51da
 }
 
 int main(int argc, char **args){
