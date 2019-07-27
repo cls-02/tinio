@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef enum inErr {
   SUCCESS = 0,
@@ -50,40 +51,29 @@ bool flpPin(CY_HANDLE h, int pinNumber) {
   return val;
 }
 
-void parser(int argc, char **args);
-
-<<<<<<< HEAD
 void attachHandles(CY_HANDLE *h) {
   uint8_t num = 0;
   cyErrHandler(CyGetListofDevices(&num));
   assert(num > 0); /* sanity check, no devices should trigger a
-                      CY_ERROR_DEVICE_NOT_FOUND error in cyErrHandler*/
+                      CY_ERROR_DEVICE_NOT_FOUND error in cyErrHandler */
   CY_DEVICE_INFO deviceInfo[num];
-  for(uint8_t i = num; i >= 0; i--) { // iterate through the device info array
-    /*  Pointer arithmetics: same as &deviceInfo[num] but without an
-        unnecessary reference-to-dereference narrative. Keep it simple, stupid!
-    */
-    cyErrHandler(CyGetDeviceInfo(num, deviceInfo+i)); // fill deviceInfo
+  for(uint8_t i = num; i >= 0; i--) {
+    cyErrHandler(CyGetDeviceInfo(i, deviceInfo+i));
   }
-  /*  at this point, every element of deviceInfo should have a CY_DEVICE_INFO
-      struct inside. */
-  // TODO: assert dis.
+
   for (uint8_t i = 0; i < num; i++) {
-    if (strcmp((deviceInfo+i) -> manufacturerName, "tinio")) {
+    if (strcmp((char *)(deviceInfo+i) -> manufacturerName, "tinio")) {
       cyErrHandler(CyOpen(i, 0, h));
     }
   }
-  /*  This abominable trainwreck of a hack needs an explanation. i iterates
-      through the deviceInfo array, until it hits a device with the manufacturer
-      string set to "tinio". It then calls CyOpen on the device. This WILL fail
-      miserably if the device is set to CDC mode, but custom and PHDC work fine.
-  */
-  // TODO: mek dis betr
-=======
-inErr attachHandles() {
-  ;
->>>>>>> 107e36b03d1a4f9c568d462d8a245ac01a1f51da
 }
 
-int main(int argc, char **args){
+inErr parser(int argc, char **args) {
+  opterr=0;
+  const char *opts  = "r:w:f:d::";
+  getopt(argc, args, opts);
+}
+
+int main(int argc, char **args) {
+
 }
